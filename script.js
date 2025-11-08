@@ -52,6 +52,15 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const targetSection = document.getElementById(id);
         if (targetSection) {
+            // '시험소개' 탭을 클릭할 때마다 JSON을 다시 로드하도록 로직 추가
+            if (id === 'intro-page') {
+                const introContent = document.getElementById('intro-content');
+                if (introContent && !introContent.dataset.loaded) { // 이미 로드되었는지 확인
+                    loadIntroPage(introContent);
+                    introContent.dataset.loaded = 'true'; // 로드됨으로 표시
+                }
+            }
+            
             const firstHeading = targetSection.querySelector('h2');
             if (firstHeading) firstHeading.focus();
         }
@@ -72,41 +81,114 @@ document.addEventListener('DOMContentLoaded', () => {
     const initialSection = window.location.hash ? window.location.hash.substring(1) : 'main-page';
     showSection(initialSection);
 
-    // --- 2.1 시험소개 페이지 내용 설정 ---
+    // --- 2.1 [!!] 시험소개 페이지 (JSON 동적 로딩) ---
     const introContent = document.getElementById('intro-content');
-    if (introContent) {
-        introContent.innerHTML = `
-            <article>
-                <h3>시험 개요</h3>
-                <p>웹 접근성 전문가 자격증은 한국정보통신기술협회(TTA)에서 주관하는 국가공인 민간자격증입니다.</p>
-                
-                <h4>응시 자격</h4>
-                <ul>
-                    <li>웹 개발 경험 1년 이상</li>
-                    <li>웹 접근성 관련 교육 이수</li>
-                    <li>관련 학과 졸업자</li>
-                </ul>
-                
-                <h4>시험 구성</h4>
-                <ul>
-                    <li>웹 접근성 표준 개론 (20문항)</li>
-                    <li>인터넷 개론 (20문항)</li>
-                    <li>HTML 개론 (20문항)</li>
-                    <li>CSS/JavaScript 개론 (20문항)</li>
-                    <li>정보 접근성 개론 (20문항)</li>
-                </ul>
-                
-                <h4>합격 기준</h4>
-                <p>각 과목별 40점 이상, 전체 평균 60점 이상</p>
-                
-                <h4>시험 시간</h4>
-                <p>총 60분 (100문항)</p>
-                
-                <h4>응시료</h4>
-                <p>50,000원 (일반), 40,000원 (학생)</p>
-            </article>
+    
+    // 필기 시험 테이블 생성 헬퍼 함수
+    function buildWrittenExamTable(data) {
+        let headers = data.headers.map(h => `<th>${h}</th>`).join('');
+        let rowsHtml = '';
+
+        // 첫 번째 행 (rowspan 적용)
+        rowsHtml += `
+            <tr>
+                <td rowspan="${data.rows.length}" style="text-align: center;">${data.commonInfo.label}</td>
+                <td>${data.rows[0].subject}</td>
+                <td style="text-align: center;">${data.rows[0].count}</td>
+                <td rowspan="${data.rows.length}">
+                    ${data.commonInfo.time}<br>
+                    <strong>${data.commonInfo.fee}</strong>
+                </td>
+            </tr>
+        `;
+
+        // 나머지 행
+        for (let i = 1; i < data.rows.length; i++) {
+            rowsHtml += `
+                <tr>
+                    <td>${data.rows[i].subject}</td>
+                    <td style="text-align: center;">${data.rows[i].count}</td>
+                </tr>
+            `;
+        }
+
+        return `
+            <h4>${data.title}</h4>
+            <table class="exam-table">
+                <thead><tr>${headers}</tr></thead>
+                <tbody>${rowsHtml}</tbody>
+            </table>
         `;
     }
+
+    // 실기 시험 테이블 생성 헬퍼 함수
+    function buildPracticalExamTable(data) {
+        let headers = data.headers.map(h => `<th>${h}</th>`).join('');
+        let row = data.rows[0];
+        let rowHtml = `
+            <tr>
+                <td style="text-align: center;">${row.label}</td>
+                <td>${row.subject}</td>
+                <td>${row.criteria}</td>
+                <td style="text-align: center;">${row.type}</td>
+                <td>${row.commonInfo}</td>
+            </tr>
+        `;
+
+        return `
+            <h4>${data.title}</h4>
+            <table class="exam-table">
+                <thead><tr>${headers}</tr></thead>
+                <tbody>${rowHtml}</tbody>
+            </table>
+        `;
+    }
+
+    // CTA(링크) 영역 생성 헬퍼 함수
+    function buildCta(data) {
+        return `
+            <div class="call-to-action">
+                <p>${data.text}</p>
+                <a href="${data.url}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+                    ${data.buttonText}
+                </a>
+            </div>
+        `;
+    }
+
+    // 시험소개 페이지 로드 메인 함수
+    async function loadIntroPage(panelElement) {
+        try {
+            panelElement.innerHTML = '<p>시험소개 내용을 불러오는 중입니다...</p>';
+            const response = await fetch('learning-intro.json');
+            if (!response.ok) throw new Error('Network response was not ok');
+            const data = await response.json();
+
+            // JSON 데이터를 기반으로 HTML 동적 생성
+            let finalHtml = `
+                <article class="intro-article">
+                    <h3>${data.introTitle}</h3>
+                    <p>${data.introText}</p>
+                    ${buildWrittenExamTable(data.writtenExam)}
+                    ${buildPracticalExamTable(data.practicalExam)}
+                    ${buildCta(data.cta)}
+                </article>
+            `;
+            
+            panelElement.innerHTML = finalHtml;
+            
+        } catch (error) {
+            console.error('Failed to load intro content:', error);
+            panelElement.innerHTML = '<p style="color: red;">시험소개 내용을 불러오지 못했습니다.</p>';
+        }
+    }
+
+    // [!!] 페이지가 처음 로드될 때 '시험소개' 탭이 활성화 상태라면 JSON 로드
+    if (introContent && !introContent.classList.contains('hidden')) {
+        loadIntroPage(introContent);
+        introContent.dataset.loaded = 'true';
+    }
+
 
     // --- 2. 캐러셀 로직 ---
     const carousel = document.getElementById('main-carousel');
@@ -127,7 +209,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
             
-            // 이전/다음 버튼 상태 관리
             if (prevBtn) {
                 prevBtn.disabled = currentSlide === 0;
                 prevBtn.setAttribute('aria-disabled', currentSlide === 0 ? 'true' : 'false');
@@ -137,7 +218,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 nextBtn.setAttribute('aria-disabled', currentSlide === slides.length - 1 ? 'true' : 'false');
             }
 
-            // 라이브 리전에 현재 슬라이드 정보 업데이트
             const liveRegion = carousel.querySelector('.carousel-live-region');
             if (liveRegion) {
                 liveRegion.textContent = `슬라이드 ${currentSlide + 1} / ${slides.length}`;
@@ -161,7 +241,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (nextBtn) nextBtn.addEventListener('click', goToNextSlide);
         if (prevBtn) prevBtn.addEventListener('click', goToPrevSlide);
         
-        // 초기 버튼 상태 설정
         updateSlides();
     }
 
@@ -181,14 +260,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'accordion-item';
 
-                // 아코디언 헤더 (버튼)
                 const header = document.createElement('button');
                 header.className = 'accordion-header';
                 header.setAttribute('aria-expanded', 'false');
                 header.setAttribute('aria-controls', `content-${item.objectiveId}`);
                 header.textContent = item.title;
 
-                // 아코디언 콘텐츠 (숨겨진 영역)
                 const content = document.createElement('div');
                 content.className = 'accordion-content';
                 content.id = `content-${item.objectiveId}`;
@@ -196,7 +273,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 content.hidden = true;
                 content.innerHTML = item.content; // JSON의 HTML 내용을 그대로 삽입
 
-                // 클릭 이벤트
                 header.addEventListener('click', () => {
                     const isExpanded = header.getAttribute('aria-expanded') === 'true';
                     header.setAttribute('aria-expanded', !isExpanded);
@@ -214,28 +290,22 @@ document.addEventListener('DOMContentLoaded', () => {
         async function switchTab(selectedTab) {
             const targetPanel = document.getElementById(selectedTab.getAttribute('aria-controls'));
             
-            // 모든 탭 비활성화
             tabs.forEach(tab => {
                 tab.setAttribute('aria-selected', 'false');
             });
             
-            // 모든 패널 숨김
             panels.forEach(panel => {
                 panel.classList.add('hidden');
             });
             
-            // 선택된 탭 활성화
             selectedTab.setAttribute('aria-selected', 'true');
             
-            // 선택된 패널 표시
             if (targetPanel) {
                 targetPanel.classList.remove('hidden');
                 
-                // [!!] 동적 로딩 로직
-                // 'data-loaded' 속성을 확인하여 이미 로드되었는지 체크
                 if (!targetPanel.dataset.loaded) {
                     const panelId = targetPanel.id;
-                    const panelInfo = learningFileMap[panelId]; // 파일맵에서 정보 가져오기
+                    const panelInfo = learningFileMap[panelId]; 
                     
                     if (panelInfo && panelInfo.file) {
                         try {
@@ -256,7 +326,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             
-            // 검색 결과 숨김
             const searchResults = document.getElementById('search-results');
             if (searchResults) {
                 searchResults.classList.add('hidden');
@@ -278,40 +347,34 @@ document.addEventListener('DOMContentLoaded', () => {
             const searchInput = document.getElementById('study-search-input');
             const searchButton = document.querySelector('.study-search button');
             
-            // 검색창을 비활성화하고 로딩 중임을 알림
             if (searchInput) {
                 searchInput.disabled = true;
                 searchInput.placeholder = '학습 데이터 로딩 중...';
             }
             if (searchButton) searchButton.disabled = true;
 
-            // 5개 파일 로드를 동시에 요청
             const loadPromises = Object.entries(learningFileMap).map(async ([panelId, info]) => {
                 try {
                     const response = await fetch(info.file);
                     if (!response.ok) throw new Error(`Failed to load ${info.file}`);
-                    const data = await response.json(); // [ { objectiveId, title, content }, ... ]
+                    const data = await response.json(); 
                     
-                    // 검색에 필요한 형태로 가공
                     return data.map(chapter => ({
-                        subjectTitle: info.title,       // 예: "HTML 개론"
-                        subjectPanelId: panelId,        // 예: "panel-3"
-                        chapterTitle: chapter.title,    // 예: "제1장. HTML의 기초"
-                        chapterContent: chapter.content // 예: "<h4>1-1. HTML이란...</h4>..."
+                        subjectTitle: info.title,
+                        subjectPanelId: panelId,
+                        chapterTitle: chapter.title,
+                        chapterContent: chapter.content 
                     }));
                 } catch (error) {
                     console.error(error);
-                    return []; // 하나가 실패해도 나머지는 진행
+                    return []; 
                 }
             });
 
-            // 모든 파일이 로드될 때까지 기다림
             const allResults = await Promise.all(loadPromises);
             
-            // 결과(2D 배열)를 1D 배열로 펼쳐서 전역 변수에 저장
             searchableLearningContent = allResults.flat();
             
-            // 검색창 활성화
             if (searchInput) {
                 searchInput.disabled = false;
                 searchInput.placeholder = '키워드로 학습 내용 검색...';
@@ -323,7 +386,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // [!!] 페이지 로드 시 첫 번째 탭 콘텐츠 미리 로드 및 검색 인덱스 생성
         const firstTab = document.getElementById('tab-1');
-        if (firstTab.getAttribute('aria-selected') === 'true') {
+        if (firstTab && firstTab.getAttribute('aria-selected') === 'true') {
             switchTab(firstTab);
         }
         initializeSearchIndex(); // 검색 인덱스 생성 시작
@@ -359,7 +422,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             searchResults.classList.remove('hidden');
 
-            // 검색 결과를 보여줄 때, 모든 아코디언 탭 패널을 숨김
             document.querySelectorAll('[role="tabpanel"]').forEach(panel => {
                 panel.classList.add('hidden');
             });
@@ -374,7 +436,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const lowerQuery = query.toLowerCase();
             const results = [];
             
-            // HTML 태그를 제거하고 공백을 정리하는 헬퍼 함수
             function stripHtml(html) {
                 return html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
             }
@@ -386,7 +447,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (fullText.includes(lowerQuery)) {
                     
-                    // 검색된 위치를 찾아 미리보기(snippet) 생성
                     const matchedIndex = fullText.indexOf(lowerQuery);
                     const beforeMatch = fullText.substring(Math.max(0, matchedIndex - 30), matchedIndex);
                     const matchedText = fullText.substring(matchedIndex, matchedIndex + query.length);
@@ -410,16 +470,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (query) performSearch(query);
         });
 
-        // [!!] '검색 결과에서 탭으로 이동' 함수
-        // (onclick에서 호출할 수 있도록 전역 window 객체에 할당)
         window.showSubjectTab = function(subjectPanelId) {
             const targetTab = document.querySelector(`[aria-controls="${subjectPanelId}"]`);
             if (targetTab) {
-                // 탭을 클릭하여 switchTab 로직(아코디언 로딩)을 실행
                 targetTab.click(); 
             }
             
-            // 검색 결과 숨기기
             const searchResults = document.getElementById('search-results');
             if (searchResults) searchResults.classList.add('hidden');
             
@@ -1287,5 +1343,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    console.log('=== APPLICATION INITIALIZED SUCCESSFULLY (Full Version, v6-Search) ===');
+    console.log('=== APPLICATION INITIALIZED SUCCESSFULLY (Full Version, v7-IntroJSON) ===');
 });
