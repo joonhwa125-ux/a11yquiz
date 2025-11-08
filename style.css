@@ -202,6 +202,16 @@ section {
     border: 1px solid var(--gray-200);
 }
 
+/* [!!] 메인 페이지 배너 섹션의 여백과 배경 제거 */
+section#main-page {
+    padding: 0;
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+/* ... (이하 기존 스타일) ... */
+
 /* ===== 컴포넌트 시스템 ===== */
 /* 버튼 시스템 */
 .btn {
@@ -361,12 +371,14 @@ section {
 }
 
 /* ===== 캐러셀 컴포넌트 ===== */
+/* ===== 캐러셀 컴포넌트 ===== */
 #main-carousel {
     position: relative;
     margin: var(--spacing-8) 0;
     border-radius: var(--radius-xl);
     overflow: hidden;
-    background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-700) 100%);
+    /* [!!] 메인 컨테이너에서 파란 배경 제거 */
+    /* background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-700) 100%); */
     color: white;
     min-height: 300px;
     display: flex;
@@ -378,12 +390,18 @@ section {
     position: relative;
     width: 100%;
     text-align: center;
-    padding: var(--spacing-12);
+    /* [!!] 슬라이드 컨테이너에서 패딩 제거 */
+    padding: 0;
 }
 
 .carousel-slide {
     opacity: 1;
     transition: opacity 0.5s ease;
+    
+    /* [!!] 텍스트 슬라이드를 위한 기본값 (파란 배경, 패딩) */
+    padding: var(--spacing-12);
+    background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-700) 100%);
+    min-height: 300px; /* 모든 슬라이드 높이 통일 */
 }
 
 .carousel-slide.hidden {
@@ -417,6 +435,23 @@ section {
     opacity: 0.9;
     max-width: 600px;
     line-height: 1.6;
+}
+
+/* [!!] 이미지가 포함된 슬라이드 (패딩, 배경 제거) */
+.carousel-slide:has(.carousel-image) {
+    padding: 0;
+    background: none;
+    display: block; 
+    align-items: initial;
+    justify-content: initial;
+}
+
+/* [!!] 이미지 스타일 (고정 높이) */
+.carousel-slide .carousel-image {
+    width: 100%;
+    height: 300px; /* 배너 높이에 고정 */
+    object-fit: cover; 
+    display: block;
 }
 
 .carousel-controls {
@@ -506,7 +541,6 @@ section {
     outline: 2px solid rgba(255, 255, 255, 0.8);
     outline-offset: 2px;
 }
-
 /* ===== 탭 인터페이스 ===== */
 .study-header {
     display: flex;
