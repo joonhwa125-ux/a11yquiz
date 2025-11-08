@@ -567,35 +567,7 @@ section {
     min-height: 400px;
 }
 
-[role="tabpanel"] h3 {
-    color: var(--primary-600);
-    margin-bottom: var(--spacing-6);
-    font-size: var(--font-size-2xl);
-    font-weight: 700;
-}
-
-[role="tabpanel"] h4 {
-    color: var(--gray-700);
-    margin: var(--spacing-6) 0 var(--spacing-3) 0;
-    font-size: var(--font-size-xl);
-    font-weight: 600;
-}
-
-[role="tabpanel"] ul {
-    margin-left: var(--spacing-6);
-    margin-bottom: var(--spacing-4);
-}
-
-[role="tabpanel"] li {
-    margin-bottom: var(--spacing-2);
-    line-height: 1.6;
-}
-
-[role="tabpanel"] p {
-    margin-bottom: var(--spacing-4);
-    line-height: 1.6;
-    color: var(--gray-700);
-}
+/* [!!] 기존 tabpanel h3, h4 등 스타일 제거 (아코디언 스타일이 대체) */
 
 /* ===== 검색 컴포넌트 ===== */
 .study-search {
@@ -1628,6 +1600,176 @@ pre.question-text {
     vertical-align: middle;
 }
 
+/* ===== [추가] 시험소개 페이지 테이블 스타일 ===== */
+.exam-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: var(--spacing-6) 0;
+    font-size: var(--font-size-sm);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--gray-200);
+}
+
+/* 실기 시험 테이블의 5번째 열(시험시간) 중앙 정렬 */
+.exam-table tbody tr:only-child td:nth-child(5) {
+    text-align: center;
+}
+
+.exam-table th,
+.exam-table td {
+    border: 1px solid var(--gray-200);
+    padding: var(--spacing-3) var(--spacing-4);
+    text-align: left;
+    vertical-align: middle;
+}
+
+.exam-table th {
+    background-color: var(--gray-100);
+    font-weight: 600;
+    color: var(--gray-700);
+    text-align: center;
+}
+
+.exam-table td {
+    background-color: white;
+    color: var(--gray-800);
+    line-height: 1.6;
+}
+
+.exam-table td:first-child,
+.exam-table td:nth-child(2),
+.exam-table td:nth-child(3) {
+    text-align: center;
+}
+
+.exam-table td[rowspan] {
+    text-align: center;
+    vertical-align: middle;
+    font-weight: 500;
+}
+
+.exam-table strong {
+    color: var(--danger-600);
+    font-weight: 700;
+    font-size: var(--font-size-base);
+}
+
+.call-to-action {
+    margin-top: var(--spacing-8);
+    padding: var(--spacing-6);
+    background: var(--primary-50);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--primary-100);
+    text-align: center;
+}
+
+.call-to-action p {
+    margin-bottom: var(--spacing-4);
+    font-size: var(--font-size-base);
+    color: var(--primary-700);
+    line-height: 1.6;
+}
+
+/* ===== [추가] 아코디언 UI 스타일 ===== */
+.accordion-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+    margin-top: var(--spacing-6);
+}
+
+.accordion-item {
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: white;
+}
+
+.accordion-header {
+    width: 100%;
+    padding: var(--spacing-4) var(--spacing-6);
+    background: white;
+    border: none;
+    border-bottom: 1px solid var(--gray-200);
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--gray-800);
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    font-family: inherit;
+}
+
+.accordion-item:last-child .accordion-header {
+    border-bottom: none;
+}
+
+.accordion-header:hover,
+.accordion-header:focus {
+    background-color: var(--primary-50);
+    color: var(--primary-600);
+}
+
+.accordion-header::before {
+    content: '▼';
+    font-size: var(--font-size-sm);
+    transition: transform 0.2s ease;
+    transform-origin: center;
+}
+
+.accordion-header[aria-expanded="true"] {
+    background-color: var(--primary-50);
+    color: var(--primary-600);
+    border-bottom-color: var(--gray-200);
+}
+
+.accordion-header[aria-expanded="true"]::before {
+    transform: rotate(-180deg);
+}
+
+.accordion-content {
+    padding: var(--spacing-6);
+    background: var(--gray-50);
+    border-top: 1px solid var(--gray-200);
+}
+
+.accordion-content h4 {
+    color: var(--primary-600);
+    font-size: var(--font-size-base);
+    margin-top: var(--spacing-4);
+    margin-bottom: var(--spacing-3);
+    border-bottom: 1px solid var(--primary-100);
+    padding-bottom: var(--spacing-2);
+}
+
+.accordion-content p,
+.accordion-content ul {
+    font-size: var(--font-size-sm);
+    line-height: 1.7;
+    margin-bottom: var(--spacing-4);
+}
+
+.accordion-content ul {
+    margin-left: var(--spacing-5);
+}
+
+.accordion-content li {
+    margin-bottom: var(--spacing-2);
+}
+
+.accordion-content pre {
+    white-space: pre-wrap;
+    font-family: 'Courier New', monospace;
+    background: var(--gray-100);
+    padding: var(--spacing-4);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--gray-200);
+    font-size: var(--font-size-sm);
+}
+
 
 /* 반응형 디자인 */
 @media (max-width: 768px) {
@@ -1813,6 +1955,64 @@ pre.question-text {
     .time-announcement .announcement-icon {
         font-size: var(--font-size-sm);
     }
+
+    /* [!!] 반응형 테이블 스타일 추가 */
+    .exam-table, .exam-table thead, .exam-table tbody, .exam-table th, .exam-table td, .exam-table tr {
+        display: block;
+    }
+    .exam-table thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+    .exam-table tr {
+        border: 1px solid var(--gray-300);
+        margin-bottom: var(--spacing-4);
+        border-radius: var(--radius-md);
+        overflow: hidden;
+    }
+    .exam-table td {
+        border: none;
+        border-bottom: 1px solid var(--gray-200);
+        position: relative;
+        padding-left: 50%;
+        text-align: right;
+    }
+    .exam-table td:before {
+        position: absolute;
+        top: 50%;
+        left: var(--spacing-3);
+        transform: translateY(-50%);
+        width: 45%;
+        padding-right: var(--spacing-2);
+        white-space: nowrap;
+        text-align: left;
+        font-weight: 600;
+        color: var(--gray-700);
+    }
+    /* 필기 테이블용 레이블 */
+    .exam-table td[rowspan="5"]:nth-child(1):before { content: "구분"; }
+    .exam-table td:nth-child(2):before { content: "시험과목"; }
+    .exam-table td[rowspan="5"]:nth-child(3):before, 
+    .exam-table td:nth-child(3):before { content: "문항수"; }
+    .exam-table td[rowspan="5"]:nth-child(4):before { content: "시험시간/응시료"; }
+    /* 실기 테이블용 레이블 */
+    .exam-table tbody:nth-child(2) tr:nth-child(1) td:nth-child(1):before { content: "구분"; }
+    .exam-table tbody:nth-child(2) tr:nth-child(1) td:nth-child(2):before { content: "시험과목"; }
+    .exam-table tbody:nth-child(2) tr:nth-child(1) td:nth-child(3):before { content: "출제기준"; }
+    .exam-table tbody:nth-child(2) tr:nth-child(1) td:nth-child(4):before { content: "시험유형"; }
+    .exam-table tbody:nth-child(2) tr:nth-child(1) td:nth-child(5):before { content: "시험시간/응시료"; }
+    
+    .exam-table td[rowspan] {
+        border-bottom: 1px solid var(--gray-200);
+    }
+    .exam-table td:last-child {
+        border-bottom: 0;
+    }
+    .exam-table td, .exam-table td[rowspan] {
+        text-align: right;
+        padding-left: 50%;
+    }
 }
 
 @media (max-width: 480px) {
@@ -1945,113 +2145,4 @@ pre.question-text {
     #quiz-timer.critical {
         animation: none;
     }
-}
-
-/* ... (기존 style.css 내용) ... */
-
-
-/* ===== [추가] 아코디언 UI 스타일 ===== */
-.accordion-container {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-2);
-    margin-top: var(--spacing-6);
-}
-
-.accordion-item {
-    border: 1px solid var(--gray-200);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    background: white;
-}
-
-.accordion-header {
-    width: 100%;
-    padding: var(--spacing-4) var(--spacing-6);
-    background: white;
-    border: none;
-    border-bottom: 1px solid var(--gray-200);
-    font-size: var(--font-size-lg);
-    font-weight: 600;
-    color: var(--gray-800);
-    text-align: left;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-3);
-    font-family: inherit;
-}
-
-.accordion-item:last-child .accordion-header {
-    border-bottom: none;
-}
-
-.accordion-header:hover,
-.accordion-header:focus {
-    background-color: var(--primary-50);
-    color: var(--primary-600);
-}
-
-.accordion-header::before {
-    content: '▼';
-    font-size: var(--font-size-sm);
-    transition: transform 0.2s ease;
-    transform-origin: center;
-}
-
-.accordion-header[aria-expanded="true"] {
-    background-color: var(--primary-50);
-    color: var(--primary-600);
-    border-bottom-color: var(--gray-200);
-}
-
-.accordion-header[aria-expanded="true"]::before {
-    transform: rotate(-180deg);
-}
-
-.accordion-content {
-    padding: var(--spacing-6);
-    background: var(--gray-50);
-    border-top: 1px solid var(--gray-200);
-}
-
-.accordion-content h4 {
-    color: var(--primary-600);
-    font-size: var(--font-size-base);
-    margin-top: var(--spacing-4);
-    margin-bottom: var(--spacing-3);
-    border-bottom: 1px solid var(--primary-100);
-    padding-bottom: var(--spacing-2);
-}
-
-.accordion-content p,
-.accordion-content ul {
-    font-size: var(--font-size-sm);
-    line-height: 1.7;
-    margin-bottom: var(--spacing-4);
-}
-
-.accordion-content ul {
-    margin-left: var(--spacing-5);
-}
-
-.accordion-content li {
-    margin-bottom: var(--spacing-2);
-}
-
-.accordion-content pre {
-    white-space: pre-wrap;
-    font-family: 'Courier New', monospace;
-    background: var(--gray-100);
-    padding: var(--spacing-4);
-    border-radius: var(--radius-md);
-    border: 1px solid var(--gray-200);
-    font-size: var(--font-size-sm);
-}
-
-
-/* 반응형 디자인 */
-@media (max-width: 768px) {
-/* ... (기존 미디어 쿼리 내용) ... */
 }
