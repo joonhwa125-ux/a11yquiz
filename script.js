@@ -62,7 +62,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             const firstHeading = targetSection.querySelector('h2');
-            if (firstHeading) firstHeading.focus();
+            if (firstHeading) {
+                firstHeading.focus();
+            }
+
+            // [!!] 시험 결과 페이지일 때, 포커스 후 강제로 스크롤을 맨 위로 이동
+            if (id === 'result-dashboard') {
+                window.scrollTo(0, 0);
+            }
         }
     }
 
