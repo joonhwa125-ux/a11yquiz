@@ -1,0 +1,32 @@
+[
+  {
+    "objectiveId": "ch1",
+    "title": "제1장. 인터넷의 이해",
+    "content": "<h4>1-1. 인터넷 개요 및 역사</h4><p><strong>개요:</strong> 전 세계 컴퓨터들을 연결하는 거대한 통신망(Network of networks). TCP/IP 프로토콜을 기반으로 정보를 주고받음.</p><p><strong>역사:</strong></p><ul><li><strong>1960년대:</strong> 미 국방성의 ARPANET(아르파넷)에서 시작 (군사 목적).</li><li><strong>1980년대:</strong> 민간 연구용으로 확대, TCP/IP가 표준 프로토콜로 채택됨.</li><li><strong>1990년대:</strong> 월드와이드웹(WWW) 등장으로 대중화 시작.</li></ul><h4>1-2. 인터넷 관련 주요 기관</h4><ul><li><strong>ISOC (Internet Society):</strong> 인터넷의 성장과 발전을 위한 국제 비영리 단체.</li><li><strong>IETF (Internet Engineering Task Force):</strong> TCP/IP 등 인터넷 표준 기술을 개발하는 그룹.</li><li><strong>W3C (World Wide Web Consortium):</strong> HTML, CSS 등 웹 표준을 제정하는 국제 컨소시엄.</li><li><strong>KISA (한국인터넷진흥원):</strong> 국내 인터넷 주소(kr) 관리 및 정보보호 담당.</li></ul><h4>1-3. 인터넷의 특징</h4><ul><li><strong>개방성:</strong> 누구나 정해진 규약(프로토콜)만 지키면 자유롭게 참여 가능.</li><li><strong>공유성:</strong> 다양한 정보를 쉽게 공유하고 전파할 수 있음.</li><li><strong>익명성:</strong> 신분을 드러내지 않고 활동 가능 (양면성 존재).</li><li><strong>쌍방향성:</strong> 정보 제공자와 사용자 간의 상호작용이 가능.</li></ul>"
+  },
+  {
+    "objectiveId": "ch2",
+    "title": "제2장. 인터넷 접속 기술",
+    "content": "<h4>2-1. IP 주소와 도메인 네임</h4><p><strong>IP 주소 (Internet Protocol Address):</strong></p><ul><li><strong>정의:</strong> 인터넷에 연결된 각 컴퓨터(호스트)를 식별하기 위한 고유한 숫자 주소.</li><li><strong>IPv4 (버전 4):</strong> 32비트 주소 체계. 4개의 10진수로 표현 (예: 172.16.254.1). 주소 고갈 문제 발생.</li><li><strong>IPv6 (버전 6):</strong> 128비트 주소 체계. 16진수로 표현. 사실상 무한대의 주소 할당 가능.</li></ul><p><strong>도메인 네임 (Domain Name):</strong></p><ul><li><strong>정의:</strong> 사람이 기억하기 어려운 IP 주소를 알기 쉬운 문자로 표현한 주소 (예: www.naver.com).</li><li><strong>구조 (오른쪽부터 왼쪽으로 계층적):</strong><br>www.korea.go.kr<br>.kr: 최상위 도메인 (ccTLD - 국가 코드)<br>.go: 2단계 도메인 (정부 기관)<br>korea: 3단계 도메인 (기관명)</li></ul><h4>2-2. DNS (Domain Name System)</h4><p><strong>정의:</strong> 문자(도메인 네임)를 숫자(IP 주소)로 변환해주는 시스템. 인터넷의 '전화번호부'.</p><p><strong>동작 과정:</strong></p><ol><li>사용자가 브라우저에 www.example.com 입력.</li><li>PC는 설정된 DNS 서버에 IP 주소 질의(Query).</li><li>DNS 서버는 IP 주소(예: 93.184.216.34)를 찾아 응답.</li><li>브라우저는 해당 IP 주소의 서버로 접속.</li></ol><h4>2-3. URL과 WWW</h4><ul><li><strong>URL (Uniform Resource Locator):</strong> 인터넷 상 자원(Resource)의 위치를 나타내는 표준 주소 체계.</li><li><strong>URL 구조:</strong> 프로토콜://호스트주소[:포트번호]/경로/파일명<br><code>https://www.example.com:80/news/article.html</code><br><strong>https:</strong> 프로토콜 (데이터를 주고받는 통신 규약)<br><strong>www.example.com:</strong> 호스트(서버) 주소<br><strong>:80:</strong> 포트 번호 (생략 가능)<br><strong>/news/article.html:</strong> 서버 내 자원의 경로</li><li><strong>WWW (World Wide Web):</strong> 하이퍼텍스트(링크)를 통해 연결된 정보의 집합. 인터넷 위에서 동작하는 서비스 중 하나.</li></ul>"
+  },
+  {
+    "objectiveId": "ch3",
+    "title": "제3장. 웹 브라우저",
+    "content": "<h4>3-1. 웹 브라우저 개요 및 종류</h4><p><strong>개요:</strong> 웹 서버의 정보를 요청하여 HTML, CSS, JavaScript 등을 해석하고 사용자에게 시각적으로 보여주는 응용 소프트웨어.</p><p><strong>종류:</strong> Google Chrome, Microsoft Edge, Apple Safari, Mozilla Firefox, Naver Whale 등.</p><h4>3-2. 웹 브라우저 기능과 활용</h4><p><strong>핵심 기능:</strong></p><ul><li><strong>렌더링(Rendering):</strong> HTML과 CSS를 해석하여 화면에 그리는 기능.</li><li><strong>자바스크립트 실행:</strong> 동적인 기능을 수행.</li><li><strong>네트워킹:</strong> HTTP 프로토콜을 통해 서버와 통신.</li></ul><p><strong>부가 기능:</strong> 북마크, 방문 기록, 캐시, 쿠키 관리, 개발자 도구 등.</p><p><strong>플러그인(Plug-in):</strong> 브라우저가 기본적으로 지원하지 않는 기능(과거 Flash, ActiveX 등)을 실행하기 위한 보조 프로그램. (HTML5 이후 사용 감소)</p>"
+  },
+  {
+    "objectiveId": "ch4",
+    "title": "제4장. 인터넷 응용 서비스",
+    "content": "<h4>4-1. 인터넷 응용 서비스</h4><ul><li><strong>검색:</strong> 검색 엔진을 통해 원하는 정보를 찾음.</li><li><strong>이메일:</strong> SMTP(송신), POP3/IMAP(수신) 프로토콜을 이용한 전자 우편 서비스.</li><li><strong>온라인 게임:</strong> 인터넷을 통해 다른 사람들과 함께 즐기는 게임.</li><li><strong>이러닝(e-learning):</strong> 온라인을 통한 교육 및 학습 활동.</li><li><strong>온라인 쇼핑:</strong> 전자상거래(e-commerce).</li><li><strong>온라인 뱅킹:</strong> 인터넷을 통한 금융 거래.</li></ul><h4>4-2. 인터넷 활용 신기술</h4><ul><li><strong>빅데이터 (Big Data):</strong> 기존 방식으로 처리하기 어려운 방대한 양의 데이터. (3V: Volume, Velocity, Variety / 5V: +Veracity, Value / 7V: +Validity, Volatility)</li><li><strong>소셜 미디어 (SNS):</strong> 사용자 간의 관계 형성 및 정보 공유 서비스.</li><li><strong>클라우드 컴퓨팅 (Cloud Computing):</strong> 인터넷을 통해 서버, 스토리지, 소프트웨어 등의 IT 자원을 빌려 쓰는 서비스. (SaaS, PaaS, IaaS)</li><li><strong>사물 인터넷(IoT - Internet of Things):</strong> 각종 사물에 센서와 통신 기능을 내장하여 인터넷에 연결하는 기술.</li><li><strong>홈네트워크:</strong> 가정 내 기기들을 네트워크로 연결하여 제어하는 시스템.</li><li><strong>인공지능(AI), 머신러닝 (ML):</strong> 데이터를 학습하여 인간처럼 사고하고 판단하는 기술.</li></ul>"
+  },
+  {
+    "objectiveId": "ch5",
+    "title": "제5장. 인터넷 검색엔진",
+    "content": "<h4>5-1. 검색엔진 개요 및 종류</h4><p><strong>개요:</strong> 웹에 흩어져 있는 정보를 수집(Crawling), 정리(Indexing)하여 사용자가 키워드로 검색할 수 있게 해주는 시스템.</p><p><strong>종류:</strong> Google, Naver, Daum, Bing 등.</p><h4>5-2. 검색엔진 연산자</h4><ul><li><strong>\"\"(큰따옴표):</strong> 정확한 단어나 구문 검색. (예: \"웹 접근성 전문가\")</li><li><strong>AND (또는 공백):</strong> 두 단어가 모두 포함된 결과 검색. (예: 웹 AND 접근성)</li><li><strong>OR :</strong> 둘 중 하나라도 포함된 결과 검색. (예: 접근성 OR 사용성)</li><li><strong>- (마이너스):</strong> 특정 단어를 제외한 결과 검색. (예: 접근성 -장애인)</li><li><strong>* (별표):</strong> 특정 위치의 단어를 모를 때 사용하는 와일드카드.</li><li><strong>SITE :</strong> 특정 사이트 내에서만 검색. (예: site:w3.org accessibility)</li></ul>"
+  },
+  {
+    "objectiveId": "terms",
+    "title": "핵심 용어 정리",
+    "content": "<ul><li><strong>TCP/IP:</strong> 인터넷 통신의 핵심 프로토콜 스위트.</li><li><strong>DNS:</strong> 도메인 네임을 IP 주소로 변환하는 시스템.</li><li><strong>클라이언트(Client):</strong> 서비스를 요청하는 쪽. (예: 우리의 웹 브라우저)</li><li><strong>서버(Server):</strong> 요청에 응답하여 서비스를 제공하는 쪽. (예: 네이버 웹 서버)</li><li><strong>URL:</strong> 인터넷 자원의 위치를 나타내는 주소.</li><li><strong>HTTP/HTTPS:</strong> 웹 서버와 클라이언트(브라우저) 간의 통신 규약 (S는 보안 강화).</li><li><strong>렌더링 엔진:</strong> 브라우저가 코드를 해석하여 화면에 그리는 핵심 부분.</li><li><strong>클라우드 컴퓨팅:</strong> 인터넷 기반 컴퓨팅 자원 공유 서비스.</li><li><strong>IoT:</strong> 사물 인터넷.</li></ul>"
+  }
+]
