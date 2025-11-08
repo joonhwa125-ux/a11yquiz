@@ -4,11 +4,37 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentQuestionIndex = 0;
     let quizTimer = null;
     let remainingTime = 60 * 60; // 60분
+    let allQuestions = []; // 현재 진행 중인 퀴즈 문제를 저장할 배열
+
+    // [!!] 검색 기능을 위한 새 전역 변수
+    let searchableLearningContent = []; // 5개 과목의 모든 텍스트를 저장할 배열
+    const learningFileMap = {
+        'panel-1': { file: 'learning-access.json', title: '웹 접근성 표준 개론' },
+        'panel-2': { file: 'learning-internet.json', title: '인터넷 개론' },
+        'panel-3': { file: 'learning-html.json', title: 'HTML 개론' },
+        'panel-4': { file: 'learning-css-script.json', title: 'CSS/스크립트 개론' },
+        'panel-5': { file: 'learning-info-access.json', title: '정보 접근성 개론' }
+    };
 
     // 전역 변수 상태 확인
     console.log('=== GLOBAL VARIABLES INITIALIZED ===');
-    console.log('userAnswers:', userAnswers);
-    console.log('currentQuestionIndex:', currentQuestionIndex);
+
+    // --- 0. 퀴즈 데이터 로드 함수 ---
+    async function loadQuizData(fileName) {
+        try {
+            const response = await fetch(fileName);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            allQuestions = await response.json();
+            console.log(`Quiz data loaded successfully: ${fileName}`, allQuestions.length, 'questions');
+            return true;
+        } catch (error) {
+            console.error('Failed to load quiz data:', error);
+            alert(`퀴즈 데이터를 불러오는 데 실패했습니다: ${fileName}\n파일이 올바른 위치에 있는지 확인해주세요.`);
+            return false;
+        }
+    }
 
     // --- 1. SPA 네비게이션 로직 ---
     const mainContent = document.querySelector('main');
@@ -139,137 +165,53 @@ document.addEventListener('DOMContentLoaded', () => {
         updateSlides();
     }
 
-    // --- 3. 탭 인터페이스 로직 ---
+    // --- 3. [!!] 탭 인터페이스 로직 (동적 아코디언) ---
     const tabList = document.querySelector('[role="tablist"]');
     if (tabList) {
         const tabs = tabList.querySelectorAll('[role="tab"]');
         const panels = document.querySelectorAll('[role="tabpanel"]');
+        
+        // [!!] 아코디언 UI 생성 함수
+        function buildAccordion(panelElement, data) {
+            panelElement.innerHTML = ''; // 로딩 메시지 제거
+            const accordionContainer = document.createElement('div');
+            accordionContainer.className = 'accordion-container';
 
-        // 탭 패널 내용 설정
-        const panelContents = {
-            'panel-1': `
-                <h3>웹 접근성 표준 개론</h3>
-                <p>웹 접근성은 장애인, 고령자 등 모든 사용자가 웹 콘텐츠에 접근하고 이용할 수 있도록 하는 웹 사용성의 한 측면입니다.</p>
-                <h4>주요 개념</h4>
-                <ul>
-                    <li><strong>인식의 용이성:</strong> 모든 사용자가 웹 콘텐츠를 동등하게 인식할 수 있어야 함</li>
-                    <li><strong>운용의 용이성:</strong> 모든 사용자가 웹 콘텐츠를 조작하고 네비게이션할 수 있어야 함</li>
-                    <li><strong>이해의 용이성:</strong> 모든 사용자가 웹 콘텐츠를 이해할 수 있어야 함</li>
-                    <li><strong>견고성:</strong> 웹 콘텐츠는 보조 기술을 포함한 다양한 사용자 에이전트로 해석될 수 있어야 함</li>
-                </ul>
-                <h4>WCAG 2.2 가이드라인</h4>
-                <p>웹 콘텐츠 접근성 지침 2.2는 웹 접근성을 위한 국제 표준으로, A, AA, AAA의 세 가지 수준으로 구성됩니다.</p>
-                <h4>접근성 평가 방법</h4>
-                <ul>
-                    <li>자동화 도구를 활용한 기술적 검사</li>
-                    <li>수동 검사를 통한 사용성 평가</li>
-                    <li>사용자 테스트를 통한 실제 접근성 검증</li>
-                </ul>
-            `,
-            'panel-2': `
-                <h3>인터넷 개론</h3>
-                <p>인터넷은 전 세계 컴퓨터 네트워크를 연결하는 글로벌 네트워크 시스템입니다.</p>
-                <h4>주요 프로토콜</h4>
-                <ul>
-                    <li><strong>HTTP:</strong> 웹 페이지 전송을 위한 프로토콜</li>
-                    <li><strong>HTTPS:</strong> 보안이 강화된 HTTP</li>
-                    <li><strong>FTP:</strong> 파일 전송을 위한 프로토콜</li>
-                    <li><strong>TCP/IP:</strong> 인터넷의 기본 통신 프로토콜</li>
-                </ul>
-                <h4>네트워크 구조</h4>
-                <p>인터넷은 클라이언트-서버 모델을 기반으로 하며, DNS를 통해 도메인 이름을 IP 주소로 변환합니다.</p>
-                <h4>보안 및 프라이버시</h4>
-                <ul>
-                    <li>SSL/TLS를 통한 데이터 암호화</li>
-                    <li>방화벽을 통한 네트워크 보호</li>
-                    <li>VPN을 통한 안전한 연결</li>
-                </ul>
-            `,
-            'panel-3': `
-                <h3>HTML 개론</h3>
-                <p>웹 개발의 핵심 기술인 HTML의 접근성 고려사항을 학습합니다.</p>
-                <h4>HTML 접근성</h4>
-                <ul>
-                    <li>시맨틱 마크업 사용</li>
-                    <li>alt 속성과 대체 텍스트</li>
-                    <li>테이블 구조화</li>
-                    <li>폼 레이블 연결</li>
-                </ul>
-                <h4>시맨틱 HTML 요소</h4>
-                <ul>
-                    <li>header, nav, main, section, article, aside, footer</li>
-                    <li>h1-h6 헤딩 구조</li>
-                    <li>figure, figcaption</li>
-                    <li>time, address</li>
-                </ul>
-                <h4>폼 접근성</h4>
-                <p>폼 요소들은 적절한 레이블과 설명을 통해 모든 사용자가 쉽게 이해하고 사용할 수 있어야 합니다.</p>
-                <ul>
-                    <li>label 요소를 통한 레이블 연결</li>
-                    <li>fieldset과 legend를 통한 그룹화</li>
-                    <li>required, aria-invalid 등의 상태 표시</li>
-                </ul>
-            `,
-            'panel-4': `
-                <h3>CSS/SCRIPT 개론</h3>
-                <p>CSS와 JavaScript를 활용한 웹 접근성 향상 기법을 학습합니다.</p>
-                <h4>CSS 접근성</h4>
-                <ul>
-                    <li>색상 대비 및 가독성</li>
-                    <li>포커스 표시 및 키보드 네비게이션</li>
-                    <li>반응형 및 적응형 디자인</li>
-                    <li>스크린 리더 지원</li>
-                </ul>
-                <h4>JavaScript 접근성</h4>
-                <ul>
-                    <li>키보드 이벤트 처리</li>
-                    <li>ARIA 속성 동적 관리</li>
-                    <li>포커스 관리</li>
-                    <li>에러 처리 및 피드백</li>
-                </ul>
-                <h4>성능 최적화</h4>
-                <p>접근성을 유지하면서도 성능을 최적화하는 방법을 학습합니다.</p>
-                <ul>
-                    <li>이미지 최적화 및 지연 로딩</li>
-                    <li>CSS 및 JavaScript 압축</li>
-                    <li>캐싱 전략</li>
-                </ul>
-            `,
-            'panel-5': `
-                <h3>정보 접근성</h3>
-                <p>정보 접근성은 모든 사용자가 정보에 동등하게 접근할 수 있는 권리를 의미합니다.</p>
-                <h4>접근성 향상 방법</h4>
-                <ul>
-                    <li>다양한 감각을 통한 정보 제공</li>
-                    <li>키보드 및 보조 기술 지원</li>
-                    <li>명확하고 이해하기 쉬운 콘텐츠</li>
-                    <li>사용자 정의 가능한 인터페이스</li>
-                </ul>
-                <h4>법적 요구사항</h4>
-                <p>웹 접근성은 단순한 기술적 문제가 아닌 법적 권리이며, 각국에서 관련 법령을 제정하고 있습니다.</p>
-                <ul>
-                    <li>장애인차별금지 및 권리구제 등에 관한 법률</li>
-                    <li>국가정보화 기본법</li>
-                    <li>지능정보화 기본법</li>
-                </ul>
-                <h4>평가 및 개선</h4>
-                <ul>
-                    <li>접근성 감사 및 평가</li>
-                    <li>사용자 피드백 수집</li>
-                    <li>지속적인 개선 프로세스</li>
-                </ul>
-            `
-        };
+            data.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'accordion-item';
 
-        // 초기 패널 내용 설정
-        panels.forEach(panel => {
-            const panelId = panel.id;
-            if (panelContents[panelId]) {
-                panel.innerHTML = panelContents[panelId];
-            }
-        });
+                // 아코디언 헤더 (버튼)
+                const header = document.createElement('button');
+                header.className = 'accordion-header';
+                header.setAttribute('aria-expanded', 'false');
+                header.setAttribute('aria-controls', `content-${item.objectiveId}`);
+                header.textContent = item.title;
 
-        function switchTab(selectedTab) {
+                // 아코디언 콘텐츠 (숨겨진 영역)
+                const content = document.createElement('div');
+                content.className = 'accordion-content';
+                content.id = `content-${item.objectiveId}`;
+                content.role = 'region';
+                content.hidden = true;
+                content.innerHTML = item.content; // JSON의 HTML 내용을 그대로 삽입
+
+                // 클릭 이벤트
+                header.addEventListener('click', () => {
+                    const isExpanded = header.getAttribute('aria-expanded') === 'true';
+                    header.setAttribute('aria-expanded', !isExpanded);
+                    content.hidden = isExpanded;
+                });
+
+                itemDiv.appendChild(header);
+                itemDiv.appendChild(content);
+                accordionContainer.appendChild(itemDiv);
+            });
+            panelElement.appendChild(accordionContainer);
+        }
+
+        // [!!] 탭 전환 함수 (동적 로딩 로직 추가)
+        async function switchTab(selectedTab) {
             const targetPanel = document.getElementById(selectedTab.getAttribute('aria-controls'));
             
             // 모든 탭 비활성화
@@ -280,7 +222,6 @@ document.addEventListener('DOMContentLoaded', () => {
             // 모든 패널 숨김
             panels.forEach(panel => {
                 panel.classList.add('hidden');
-                panel.style.display = 'none';
             });
             
             // 선택된 탭 활성화
@@ -289,15 +230,36 @@ document.addEventListener('DOMContentLoaded', () => {
             // 선택된 패널 표시
             if (targetPanel) {
                 targetPanel.classList.remove('hidden');
-                targetPanel.style.display = 'block';
+                
+                // [!!] 동적 로딩 로직
+                // 'data-loaded' 속성을 확인하여 이미 로드되었는지 체크
+                if (!targetPanel.dataset.loaded) {
+                    const panelId = targetPanel.id;
+                    const panelInfo = learningFileMap[panelId]; // 파일맵에서 정보 가져오기
+                    
+                    if (panelInfo && panelInfo.file) {
+                        try {
+                            targetPanel.innerHTML = '<p>학습 내용을 불러오는 중입니다...</p>';
+                            const response = await fetch(panelInfo.file);
+                            if (!response.ok) throw new Error('Network response was not ok');
+                            const data = await response.json();
+                            
+                            buildAccordion(targetPanel, data); // 아코디언 UI 생성
+                            targetPanel.dataset.loaded = 'true'; // 로드되었음'으로 표시
+                        } catch (error) {
+                            console.error('Failed to load learning content:', error);
+                            targetPanel.innerHTML = '<p style="color: red;">학습 내용을 불러오지 못했습니다.</p>';
+                        }
+                    } else {
+                        targetPanel.innerHTML = '<p>학습 콘텐츠를 찾을 수 없습니다.</p>';
+                    }
+                }
             }
             
             // 검색 결과 숨김
             const searchResults = document.getElementById('search-results');
             if (searchResults) {
                 searchResults.classList.add('hidden');
-                const studySearchInput = document.getElementById('study-search-input');
-                if (studySearchInput) studySearchInput.value = '';
             }
         }
 
@@ -310,229 +272,164 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         });
-    }
 
-    // --- 3.1 과목 학습 검색 기능 ---
-    const studySearchForm = document.getElementById('study-search-form');
-    const studySearchInput = document.getElementById('study-search-input');
-    const searchResults = document.getElementById('search-results');
-    
-    if (studySearchForm && studySearchInput && searchResults) {
-        // 검색 가능한 콘텐츠 데이터 (전체 과목 포함)
-        const searchableContent = [
-            {
-                subject: '웹 접근성 표준 개론',
-                subjectId: 'panel-1',
-                content: [
-                    '웹 접근성은 장애인, 고령자 등 모든 사용자가 웹 콘텐츠에 접근하고 이용할 수 있도록 하는 웹 사용성의 한 측면입니다.',
-                    '인식의 용이성은 모든 사용자가 웹 콘텐츠를 동등하게 인식할 수 있어야 함을 의미합니다.',
-                    '운용의 용이성은 모든 사용자가 웹 콘텐츠를 조작하고 네비게이션할 수 있어야 함을 의미합니다.',
-                    '이해의 용이성은 모든 사용자가 웹 콘텐츠를 이해할 수 있어야 함을 의미합니다.',
-                    '견고성은 웹 콘텐츠가 보조 기술을 포함한 다양한 사용자 에이전트로 해석될 수 있어야 함을 의미합니다.',
-                    'WCAG 2.2 가이드라인은 웹 접근성을 위한 국제 표준으로, A, AA, AAA의 세 가지 수준으로 구성됩니다.',
-                    '접근성 평가는 자동화 도구를 활용한 기술적 검사, 수동 검사를 통한 사용성 평가, 사용자 테스트를 통한 실제 접근성 검증으로 이루어집니다.'
-                ]
-            },
-            {
-                subject: '인터넷 개론',
-                subjectId: 'panel-2',
-                content: [
-                    '인터넷은 전 세계 컴퓨터 네트워크를 연결하는 글로벌 네트워크 시스템입니다.',
-                    'HTTP는 웹 페이지 전송을 위한 프로토콜입니다.',
-                    'HTTPS는 보안이 강화된 HTTP 프로토콜입니다.',
-                    'FTP는 파일 전송을 위한 프로토콜입니다.',
-                    'TCP/IP는 인터넷의 기본 통신 프로토콜입니다.',
-                    '인터넷은 클라이언트-서버 모델을 기반으로 하며, DNS를 통해 도메인 이름을 IP 주소로 변환합니다.',
-                    'SSL/TLS를 통한 데이터 암호화, 방화벽을 통한 네트워크 보호, VPN을 통한 안전한 연결이 보안 및 프라이버시를 보장합니다.'
-                ]
-            },
-            {
-                subject: 'HTML 개론',
-                subjectId: 'panel-3',
-                content: [
-                    'HTML 접근성은 시맨틱 마크업 사용, alt 속성과 대체 텍스트, 테이블 구조화, 폼 레이블 연결을 포함합니다.',
-                    '시맨틱 HTML 요소에는 header, nav, main, section, article, aside, footer가 있습니다.',
-                    'h1-h6 헤딩 구조는 콘텐츠의 계층 구조를 명확하게 표현합니다.',
-                    'figure, figcaption 요소는 이미지와 설명을 그룹화합니다.',
-                    'time, address 요소는 시간과 주소 정보를 의미론적으로 표현합니다.',
-                    '폼 요소들은 적절한 레이블과 설명을 통해 모든 사용자가 쉽게 이해하고 사용할 수 있어야 합니다.',
-                    'label 요소를 통한 레이블 연결은 폼 접근성의 핵심입니다.',
-                    'fieldset과 legend를 통한 그룹화로 관련 폼 요소들을 묶을 수 있습니다.',
-                    'required, aria-invalid 등의 상태 표시로 폼의 유효성을 전달합니다.'
-                ]
-            },
-            {
-                subject: 'CSS/SCRIPT 개론',
-                subjectId: 'panel-4',
-                content: [
-                    'CSS와 JavaScript를 활용한 웹 접근성 향상 기법을 학습합니다.',
-                    'CSS 접근성은 색상 대비 및 가독성을 포함합니다.',
-                    '포커스 표시 및 키보드 네비게이션은 CSS로 구현할 수 있습니다.',
-                    '반응형 및 적응형 디자인으로 다양한 디바이스를 지원합니다.',
-                    '스크린 리더 지원을 위한 CSS 기법이 있습니다.',
-                    'JavaScript 접근성은 키보드 이벤트 처리를 포함합니다.',
-                    'ARIA 속성 동적 관리는 JavaScript로 구현합니다.',
-                    '포커스 관리는 사용자 경험에 중요한 요소입니다.',
-                    '에러 처리 및 피드백은 접근성 향상에 필수적입니다.',
-                    '접근성을 유지하면서도 성능을 최적화하는 방법을 학습해야 합니다.',
-                    '이미지 최적화 및 지연 로딩으로 성능을 향상시킵니다.',
-                    'CSS 및 JavaScript 압축으로 로딩 속도를 개선합니다.',
-                    '캐싱 전략으로 웹사이트 성능을 최적화합니다.'
-                ]
-            },
-            {
-                subject: '정보 접근성 개론',
-                subjectId: 'panel-5',
-                content: [
-                    '정보 접근성은 모든 사용자가 정보에 동등하게 접근할 수 있는 권리를 의미합니다.',
-                    '다양한 감각을 통한 정보 제공으로 접근성을 향상시킵니다.',
-                    '키보드 및 보조 기술 지원은 필수적입니다.',
-                    '명확하고 이해하기 쉬운 콘텐츠 작성이 중요합니다.',
-                    '사용자 정의 가능한 인터페이스를 제공해야 합니다.',
-                    '웹 접근성은 단순한 기술적 문제가 아닌 법적 권리입니다.',
-                    '장애인차별금지 및 권리구제 등에 관한 법률이 있습니다.',
-                    '국가정보화 기본법에서 웹 접근성을 규정합니다.',
-                    '지능정보화 기본법도 접근성 관련 조항을 포함합니다.',
-                    '접근성 감사 및 평가를 정기적으로 실시해야 합니다.',
-                    '사용자 피드백 수집을 통해 개선점을 찾습니다.',
-                    '지속적인 개선 프로세스를 구축해야 합니다.'
-                ]
-            }
-        ];
-
-        function performSearch(query) {
-            console.log('=== SEARCH FUNCTION CALLED ===');
-            console.log('Search query:', query);
+        // [!!] 검색 인덱스를 초기화하는 함수
+        async function initializeSearchIndex() {
+            const searchInput = document.getElementById('study-search-input');
+            const searchButton = document.querySelector('.study-search button');
             
-            if (!query.trim()) {
-                searchResults.classList.add('hidden');
-                document.querySelectorAll('[role="tabpanel"]').forEach(panel => {
-                    panel.style.display = 'block';
-                });
-                return;
+            // 검색창을 비활성화하고 로딩 중임을 알림
+            if (searchInput) {
+                searchInput.disabled = true;
+                searchInput.placeholder = '학습 데이터 로딩 중...';
             }
+            if (searchButton) searchButton.disabled = true;
 
-            const results = [];
-            const lowerQuery = query.toLowerCase();
-            console.log('Lowercase query:', lowerQuery);
-
-            searchableContent.forEach((subject, subjectIndex) => {
-                console.log(`Searching in subject ${subjectIndex + 1}: ${subject.subject}`);
-                
-                subject.content.forEach((text, contentIndex) => {
-                    if (text.toLowerCase().includes(lowerQuery)) {
-                        console.log(`Found match in ${subject.subject}, content ${contentIndex + 1}:`, text.substring(0, 100));
-                        
-                        const matchedIndex = text.toLowerCase().indexOf(lowerQuery);
-                        const beforeMatch = text.substring(Math.max(0, matchedIndex - 50), matchedIndex);
-                        const matchedText = text.substring(matchedIndex, matchedIndex + query.length);
-                        const afterMatch = text.substring(matchedIndex + query.length, matchedIndex + query.length + 50);
-
-                        results.push({
-                            subject: subject.subject,
-                            subjectId: subject.subjectId,
-                            text: text,
-                            beforeMatch: beforeMatch,
-                            matchedText: matchedText,
-                            afterMatch: afterMatch
-                        });
-                    }
-                });
+            // 5개 파일 로드를 동시에 요청
+            const loadPromises = Object.entries(learningFileMap).map(async ([panelId, info]) => {
+                try {
+                    const response = await fetch(info.file);
+                    if (!response.ok) throw new Error(`Failed to load ${info.file}`);
+                    const data = await response.json(); // [ { objectiveId, title, content }, ... ]
+                    
+                    // 검색에 필요한 형태로 가공
+                    return data.map(chapter => ({
+                        subjectTitle: info.title,       // 예: "HTML 개론"
+                        subjectPanelId: panelId,        // 예: "panel-3"
+                        chapterTitle: chapter.title,    // 예: "제1장. HTML의 기초"
+                        chapterContent: chapter.content // 예: "<h4>1-1. HTML이란...</h4>..."
+                    }));
+                } catch (error) {
+                    console.error(error);
+                    return []; // 하나가 실패해도 나머지는 진행
+                }
             });
 
-            console.log('Total search results found:', results.length);
-            displaySearchResults(results, query);
+            // 모든 파일이 로드될 때까지 기다림
+            const allResults = await Promise.all(loadPromises);
             
-            if (results.length > 0) {
-                document.querySelectorAll('[role="tabpanel"]').forEach(panel => {
-                    panel.style.display = 'none';
-                });
+            // 결과(2D 배열)를 1D 배열로 펼쳐서 전역 변수에 저장
+            searchableLearningContent = allResults.flat();
+            
+            // 검색창 활성화
+            if (searchInput) {
+                searchInput.disabled = false;
+                searchInput.placeholder = '키워드로 학습 내용 검색...';
             }
+            if (searchButton) searchButton.disabled = false;
+            
+            console.log('Search Index is ready:', searchableLearningContent.length, 'chapters loaded.');
         }
+        
+        // [!!] 페이지 로드 시 첫 번째 탭 콘텐츠 미리 로드 및 검색 인덱스 생성
+        const firstTab = document.getElementById('tab-1');
+        if (firstTab.getAttribute('aria-selected') === 'true') {
+            switchTab(firstTab);
+        }
+        initializeSearchIndex(); // 검색 인덱스 생성 시작
+    }
 
+    // --- 3.1 [!!] JSON 기반 검색 기능 ---
+    const studySearchForm = document.getElementById('study-search-form');
+    
+    if (studySearchForm) {
+        
         function displaySearchResults(results, query) {
+            const searchResults = document.getElementById('search-results');
+            if (!searchResults) return;
+
             if (results.length === 0) {
-                searchResults.innerHTML = `
-                    <h3>검색 결과</h3>
-                    <p>"${query}"에 대한 검색 결과가 없습니다.</p>
-                `;
-                document.querySelectorAll('[role="tabpanel"]').forEach(panel => {
-                    panel.style.display = 'block';
-                });
+                searchResults.innerHTML = `<h3>검색 결과</h3><p>"${query}"(으)로 검색된 결과가 없습니다.</p>`;
             } else {
                 searchResults.innerHTML = `
                     <h3>검색 결과 (${results.length}개)</h3>
-                    <p>"${query}"에 대한 검색 결과입니다.</p>
                     ${results.map(result => `
                         <div class="search-result-item">
                             <span class="subject-tag">${result.subject}</span>
-                            <h4>${result.subject}</h4>
-                            <div class="matched-text">
-                                ...${result.beforeMatch}<strong>${result.matchedText}</strong>${result.afterMatch}...
-                            </div>
+                            <h4>${result.chapter}</h4>
+                            <div class="matched-text">${result.snippet}</div>
                             <div class="context">
-                                <button onclick="showSubjectTab('${result.subjectId}')" class="link-button">
-                                    ${result.subject} 보기
+                                <button onclick="window.showSubjectTab('${result.subjectId}')" class="link-button">
+                                    ${result.subject} 탭으로 이동
                                 </button>
                             </div>
                         </div>
                     `).join('')}
                 `;
-                document.querySelectorAll('[role="tabpanel"]').forEach(panel => {
-                    panel.style.display = 'none';
-                });
             }
             searchResults.classList.remove('hidden');
+
+            // 검색 결과를 보여줄 때, 모든 아코디언 탭 패널을 숨김
+            document.querySelectorAll('[role="tabpanel"]').forEach(panel => {
+                panel.classList.add('hidden');
+            });
+        }
+        
+        function performSearch(query) {
+            if (searchableLearningContent.length === 0) {
+                alert('아직 학습 데이터를 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+                return;
+            }
+
+            const lowerQuery = query.toLowerCase();
+            const results = [];
+            
+            // HTML 태그를 제거하고 공백을 정리하는 헬퍼 함수
+            function stripHtml(html) {
+                return html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+            }
+
+            searchableLearningContent.forEach(chapter => {
+                const plainTextContent = stripHtml(chapter.chapterContent).toLowerCase();
+                const titleText = chapter.chapterTitle.toLowerCase();
+                const fullText = titleText + ' ' + plainTextContent; // 제목 + 내용
+                
+                if (fullText.includes(lowerQuery)) {
+                    
+                    // 검색된 위치를 찾아 미리보기(snippet) 생성
+                    const matchedIndex = fullText.indexOf(lowerQuery);
+                    const beforeMatch = fullText.substring(Math.max(0, matchedIndex - 30), matchedIndex);
+                    const matchedText = fullText.substring(matchedIndex, matchedIndex + query.length);
+                    const afterMatch = fullText.substring(matchedIndex + query.length, matchedIndex + query.length + 50);
+
+                    results.push({
+                        subject: chapter.subjectTitle,
+                        subjectId: chapter.subjectPanelId,
+                        chapter: chapter.chapterTitle,
+                        snippet: `...${beforeMatch}<strong>${matchedText}</strong>${afterMatch}...`
+                    });
+                }
+            });
+            
+            displaySearchResults(results, query);
         }
 
-        // 검색 폼 제출 이벤트
         studySearchForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const query = studySearchInput.value.trim();
-            performSearch(query);
+            const query = document.getElementById('study-search-input').value.trim();
+            if (query) performSearch(query);
         });
 
-        // 실시간 검색
-        studySearchInput.addEventListener('input', (e) => {
-            const query = e.target.value.trim();
-            if (query.length >= 2) {
-                performSearch(query);
-            } else if (query.length === 0) {
-                searchResults.classList.add('hidden');
-                document.querySelectorAll('[role="tabpanel"]').forEach(panel => {
-                    panel.style.display = 'block';
-                });
-            }
-        });
-
-        // 검색 결과에서 과목 탭으로 이동하는 함수
-        window.showSubjectTab = function(subjectId) {
-            const targetTab = document.querySelector(`[aria-controls="${subjectId}"]`);
+        // [!!] '검색 결과에서 탭으로 이동' 함수
+        // (onclick에서 호출할 수 있도록 전역 window 객체에 할당)
+        window.showSubjectTab = function(subjectPanelId) {
+            const targetTab = document.querySelector(`[aria-controls="${subjectPanelId}"]`);
             if (targetTab) {
-                document.querySelectorAll('[role="tab"]').forEach(tab => {
-                    tab.setAttribute('aria-selected', 'false');
-                });
-                
-                document.querySelectorAll('[role="tabpanel"]').forEach(panel => {
-                    panel.classList.add('hidden');
-                    panel.style.display = 'none';
-                });
-                
-                targetTab.setAttribute('aria-selected', 'true');
-                
-                const targetPanel = document.getElementById(subjectId);
-                if (targetPanel) {
-                    targetPanel.classList.remove('hidden');
-                    targetPanel.style.display = 'block';
-                }
-                
-                searchResults.classList.add('hidden');
-                studySearchInput.value = '';
+                // 탭을 클릭하여 switchTab 로직(아코디언 로딩)을 실행
+                targetTab.click(); 
             }
+            
+            // 검색 결과 숨기기
+            const searchResults = document.getElementById('search-results');
+            if (searchResults) searchResults.classList.add('hidden');
+            
+            const studySearchInput = document.getElementById('study-search-input');
+            if (studySearchInput) studySearchInput.value = '';
         };
     }
 
-    // --- 4. 문제풀이 흐름 ---
+
+    // --- 4. 문제풀이 흐름 --- (기존과 동일)
     const modeButtons = document.querySelectorAll('[data-mode]');
     modeButtons.forEach(button => {
         button.addEventListener('click', () => {
@@ -549,7 +446,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 문제풀이 페이지 상태 초기화 함수
+    // 문제풀이 페이지 상태 초기화 함수 (기존과 동일)
     function resetQuizPageState() {
         document.getElementById('subject-selection').classList.add('hidden');
         document.getElementById('mock-exam-info').classList.add('hidden');
@@ -564,6 +461,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         currentQuestionIndex = 0;
         userAnswers = [];
+        allQuestions = []; // 퀴즈 문제 배열 초기화
         
         if (quizTimer) {
             clearInterval(quizTimer);
@@ -574,7 +472,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('Quiz page reset - userAnswers initialized:', userAnswers);
     }
 
-    // 문제풀이 탭 클릭 시 상태 초기화
+    // 문제풀이 탭 클릭 시 상태 초기화 (기존과 동일)
     const quizPageLink = document.querySelector('a[href="#quiz-page"]');
     if (quizPageLink) {
         quizPageLink.addEventListener('click', () => {
@@ -584,41 +482,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- 5. 퀴즈 인터페이스 ---
+    // --- 5. 퀴즈 인터페이스 --- (기존과 동일 - v4-fix 버전)
     const questionContainer = document.getElementById('question-container');
     if (questionContainer) {
-        // 샘플 문제 데이터 (수정된 내용)
-        const sampleQuestions = [
-            {
-                question: "웹 접근성의 정의로 가장 적절한 것은?",
-                options: [
-                    "모든 사용자가 웹을 이용할 수 있도록 하는 것",
-                    "장애인만을 위한 웹 서비스",
-                    "고령자를 위한 웹 서비스",
-                    "시각 장애인만을 위한 웹 서비스"
-                ],
-                correct: 0,
-                explanation: "웹 접근성은 장애인, 고령자 등 모든 사용자가 웹 콘텐츠에 접근하고 이용할 수 있도록 하는 웹 사용성의 한 측면입니다."
-            },
-            {
-                question: "WCAG 2.2의 주요 원칙이 아닌 것은?",
-                options: [
-                    "인식의 용이성",
-                    "운용의 용이성",
-                    "이해의 용이성",
-                    "속도의 용이성"
-                ],
-                correct: 3,
-                explanation: "WCAG 2.2의 주요 원칙은 인식의 용이성, 운용의 용이성, 이해의 용이성, 견고성입니다. '속도의 용이성'은 포함되지 않습니다."
-            }
-        ];
 
-        // 타이머 함수들
+        // (타이머 함수들 - 기존 코드와 동일)
         function startTimer() {
             const timerElement = document.getElementById('quiz-timer');
             if (!timerElement) return;
             
-            // 개선된 타이머 HTML 구조 설정
             timerElement.innerHTML = `
                 <div class="timer-progress">
                     <svg class="timer-progress-circle" viewBox="0 0 24 24">
@@ -638,6 +510,8 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             
             const initialTime = remainingTime;
+            updateTimerDisplay(); 
+            updateTimerProgress(remainingTime, initialTime); 
             
             quizTimer = setInterval(() => {
                 remainingTime--;
@@ -655,14 +529,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 updateTimerProgress(remainingTime, initialTime);
                 updateTimerState(remainingTime);
                 
-                // 시간 알림 (10분, 5분, 1분)
-                if (remainingTime === 600) { // 10분
-                    announceTimeRemaining('시험 종료까지 10분 남았습니다.', false);
-                } else if (remainingTime === 300) { // 5분
-                    announceTimeRemaining('시험 종료까지 5분 남았습니다.', false);
-                } else if (remainingTime === 60) { // 1분
-                    announceTimeRemaining('시험 종료까지 1분 남았습니다!', true);
-                }
+                if (remainingTime === 600) announceTimeRemaining('시험 종료까지 10분 남았습니다.', false);
+                else if (remainingTime === 300) announceTimeRemaining('시험 종료까지 5분 남았습니다.', false);
+                else if (remainingTime === 60) announceTimeRemaining('시험 종료까지 1분 남았습니다!', true);
             }, 1000);
         }
 
@@ -678,16 +547,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function updateTimerProgress(currentTime, initialTime) {
             const percentage = (currentTime / initialTime) * 100;
-            
-            // 원형 진행 바 업데이트
             const circularProgress = document.getElementById('timer-circle-fill');
             if (circularProgress) {
-                const circumference = 2 * Math.PI * 9.6; // 반지름 9.6
+                const circumference = 2 * Math.PI * 9.6;
                 const offset = circumference - (percentage / 100) * circumference;
                 circularProgress.style.strokeDashoffset = offset;
             }
-            
-            // 배경 진행 바 업데이트
             const bgProgress = document.getElementById('timer-bg-progress');
             if (bgProgress) {
                 bgProgress.style.width = `${percentage}%`;
@@ -697,49 +562,27 @@ document.addEventListener('DOMContentLoaded', () => {
         function updateTimerState(currentTime) {
             const timerElement = document.getElementById('quiz-timer');
             if (!timerElement) return;
-            
-            // 시간에 따른 시각적 상태 변경
             timerElement.classList.remove('warning', 'critical');
-            
-            if (currentTime <= 60) { // 1분 이하
-                timerElement.classList.add('critical');
-            } else if (currentTime <= 300) { // 5분 이하
-                timerElement.classList.add('warning');
-            }
+            if (currentTime <= 60) timerElement.classList.add('critical');
+            else if (currentTime <= 300) timerElement.classList.add('warning');
         }
 
         function announceTimeRemaining(message, isUrgent = false) {
             console.log('Timer announcement:', message);
-            
-            // aria-live 영역에 메시지 추가
             const timerAnnouncements = document.getElementById('timer-announcements');
             if (timerAnnouncements) {
                 timerAnnouncements.textContent = message;
-                
-                if (isUrgent) {
-                    timerAnnouncements.setAttribute('aria-live', 'assertive');
-                } else {
-                    timerAnnouncements.setAttribute('aria-live', 'polite');
-                }
+                timerAnnouncements.setAttribute('aria-live', isUrgent ? 'assertive' : 'polite');
             }
-            
-            // 개선된 시각적 알림
             const announcement = document.createElement('div');
             announcement.className = `time-announcement ${isUrgent ? 'critical' : ''}`;
-            announcement.innerHTML = `
-                <span class="announcement-icon" aria-hidden="true">${isUrgent ? '⚠️' : '⏰'}</span>
-                <span>${message}</span>
-            `;
-            
+            announcement.innerHTML = `<span class="announcement-icon" aria-hidden="true">${isUrgent ? '⚠️' : '⏰'}</span><span>${message}</span>`;
             document.body.appendChild(announcement);
-            
-            // 자동 제거 (더 빠른 페이드아웃)
             const displayTime = isUrgent ? 4000 : 3000;
             setTimeout(() => {
                 if (announcement.parentNode) {
                     announcement.style.opacity = '0';
                     announcement.style.transform = 'translateX(50px)';
-                    
                     setTimeout(() => {
                         if (announcement.parentNode) {
                             announcement.parentNode.removeChild(announcement);
@@ -747,8 +590,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }, 200);
                 }
             }, displayTime);
-            
-            // aria-live 영역 정리
             setTimeout(() => {
                 if (timerAnnouncements) {
                     timerAnnouncements.textContent = '';
@@ -763,46 +604,128 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+        // [!!] .textContent를 사용하도록 변경된 displayQuestion 함수 (기존과 동일)
         function displayQuestion(index) {
-            const question = sampleQuestions[index];
+            if (allQuestions.length === 0) {
+                 questionContainer.innerHTML = '<p>문제를 불러오는 중입니다...</p>';
+                 return;
+            }
+            
+            const question = allQuestions[index];
             if (!question) return;
 
-            // userAnswers 배열 크기 확인 및 조정
-            if (userAnswers.length < sampleQuestions.length) {
-                userAnswers = new Array(sampleQuestions.length).fill(undefined);
+            // userAnswers 배열 크기 확인 및 조정 (최초 1회 실행)
+            if (userAnswers.length < allQuestions.length) {
+                userAnswers = new Array(allQuestions.length).fill(undefined);
                 console.log('UserAnswers array resized:', userAnswers);
             }
+            
+            // 1. 기존 내용 비우기
+            questionContainer.innerHTML = '';
+            
+            // 2. Fieldset 생성
+            const fieldset = document.createElement('fieldset');
+            fieldset.className = 'question-fieldset';
+            
+            // 3. Legend (문제 번호) 생성
+            const legend = document.createElement('legend');
+            legend.className = 'question-legend';
+            
+            let questionLegendText = `문제 ${index + 1} / ${allQuestions.length}`;
+            if (question.subject) {
+                 questionLegendText += ` (${question.subject})`;
+            }
+            if (question.type === 'short') {
+                 questionLegendText += ' (단답형)';
+            }
+            legend.textContent = questionLegendText; // .textContent 사용
+            fieldset.appendChild(legend);
 
-            questionContainer.innerHTML = `
-                <fieldset class="question-fieldset">
-                    <legend class="question-legend">문제 ${index + 1} / ${sampleQuestions.length}</legend>
-                    <p class="question-text">${question.question}</p>
-                    <div class="answer-options">
-                        ${question.options.map((option, optionIndex) => `
-                            <div class="option">
-                                <input type="radio" id="option-${optionIndex}" name="question-${index}" value="${optionIndex}" 
-                                       ${userAnswers[index] === optionIndex ? 'checked' : ''}>
-                                <label for="option-${optionIndex}">${option}</label>
-                            </div>
-                        `).join('')}
-                    </div>
-                </fieldset>
-            `;
+            // 4. Question (질문 텍스트) 생성
+            let questionElement;
+            if (question.type === 'short') {
+                // 단답형은 <pre> 태그로 코드 포맷 유지
+                questionElement = document.createElement('pre');
+                questionElement.className = 'question-text';
+            } else {
+                questionElement = document.createElement('p');
+                questionElement.className = 'question-text';
+            }
+            // [중요!] .textContent를 사용해 HTML 태그를 텍스트로 렌더링
+            questionElement.textContent = question.question;
+            fieldset.appendChild(questionElement);
 
-            // 옵션 선택 이벤트 - 전역 userAnswers 배열에 저장
-            questionContainer.querySelectorAll('input[type="radio"]').forEach(radio => {
-                radio.addEventListener('change', (e) => {
-                    const selectedValue = parseInt(e.target.value);
-                    userAnswers[index] = selectedValue;
-                    console.log(`Question ${index + 1} answer saved: ${selectedValue}`);
-                    console.log('Current userAnswers:', userAnswers);
+            // 5. Answer Options (답변 영역) 생성
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'answer-options';
+
+            if (question.type === 'short') {
+                // 단답형 (textarea)
+                const label = document.createElement('label');
+                label.htmlFor = `short-answer-${index}`;
+                label.className = 'visually-hidden';
+                label.textContent = '답안 입력';
+                
+                const textarea = document.createElement('textarea');
+                textarea.id = `short-answer-${index}`;
+                textarea.className = 'short-answer-textarea';
+                textarea.rows = 6;
+                textarea.placeholder = '여기에 답안을 작성하세요...';
+                textarea.value = userAnswers[index] || '';
+                
+                // 이벤트 리스너 부착
+                textarea.addEventListener('blur', (e) => { 
+                    userAnswers[index] = e.target.value;
+                    console.log(`Question ${index + 1} answer saved (short): ${e.target.value.substring(0, 20)}...`);
                 });
-            });
+                
+                optionsDiv.appendChild(label);
+                optionsDiv.appendChild(textarea);
+                
+            } else {
+                // 객관식 (radio)
+                question.options.forEach((option, optionIndex) => {
+                    const optionDiv = document.createElement('div');
+                    optionDiv.className = 'option';
+                    
+                    const input = document.createElement('input');
+                    input.type = 'radio';
+                    input.id = `option-${optionIndex}`;
+                    input.name = `question-${index}`;
+                    input.value = optionIndex;
+                    if (userAnswers[index] === optionIndex) {
+                        input.checked = true;
+                    }
+                    
+                    const label = document.createElement('label');
+                    label.htmlFor = `option-${optionIndex}`;
+                    // [중요!] .textContent를 사용해 HTML 태그를 텍스트로 렌더링
+                    label.textContent = option; 
+                    
+                    // 이벤트 리스너 부착
+                    input.addEventListener('change', (e) => {
+                        const selectedValue = parseInt(e.target.value);
+                        userAnswers[index] = selectedValue;
+                        console.log(`Question ${index + 1} answer saved (mcq): ${selectedValue}`);
+                    });
+                    
+                    optionDiv.appendChild(input);
+                    optionDiv.appendChild(label);
+                    optionsDiv.appendChild(optionDiv);
+                });
+            }
+            
+            fieldset.appendChild(optionsDiv);
+            
+            // 6. 완성된 fieldset을 questionContainer에 삽입
+            questionContainer.appendChild(fieldset);
 
+            // --- [이하 로직은 동일] ---
+            
             // 제출 버튼 표시/숨김
             const submitBtn = document.getElementById('submit-quiz-btn');
             if (submitBtn) {
-                submitBtn.classList.toggle('hidden', index < sampleQuestions.length - 1);
+                submitBtn.classList.toggle('hidden', index < allQuestions.length - 1);
             }
 
             // 이전/다음 버튼 표시/숨김
@@ -813,11 +736,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 prevBtn.style.display = index === 0 ? 'none' : 'block';
             }
             if (nextBtn) {
-                nextBtn.style.display = index === sampleQuestions.length - 1 ? 'none' : 'block';
+                nextBtn.style.display = index === allQuestions.length - 1 ? 'none' : 'block';
             }
         }
 
-        // 이전/다음 버튼 이벤트
+        // 이전/다음 버튼 이벤트 (기존과 동일)
         const prevBtn = document.getElementById('prev-question-btn');
         const nextBtn = document.getElementById('next-question-btn');
 
@@ -834,7 +757,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (nextBtn) {
             nextBtn.addEventListener('click', () => {
-                if (currentQuestionIndex < sampleQuestions.length - 1) {
+                if (currentQuestionIndex < allQuestions.length - 1) {
                     currentQuestionIndex++;
                     console.log(`Moving to next question ${currentQuestionIndex + 1}`);
                     console.log('Current userAnswers before display:', userAnswers);
@@ -843,41 +766,86 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // 문제풀이 시작 버튼들
+        // 퀴즈 시작 버튼 로직 (동적 로딩) (기존과 동일)
         const startQuizBtn = document.getElementById('start-quiz-btn');
         const startMockExamBtn = document.getElementById('start-mock-exam-btn');
 
+        // 공통 퀴즈 시작 로직
+        function startQuiz() {
+            if (allQuestions.length === 0) {
+                alert('불러온 문제 데이터가 없습니다. 다시 시도해주세요.');
+                return;
+            }
+            
+            showSection('quiz-interface');
+            currentQuestionIndex = 0;
+            userAnswers = new Array(allQuestions.length).fill(undefined); 
+            console.log('Quiz started - userAnswers initialized:', userAnswers);
+            
+            remainingTime = 60 * 60; // 60분으로 초기화
+            startTimer(); // 타이머 시작
+            displayQuestion(currentQuestionIndex); // 첫 문제 표시
+        }
+        
+        // 과목별 퀴즈 시작 버튼
         if (startQuizBtn) {
-            startQuizBtn.addEventListener('click', () => {
+            startQuizBtn.addEventListener('click', async () => {
                 const selectedSubject = document.querySelector('input[name="subject"]:checked');
-                if (selectedSubject) {
-                    showSection('quiz-interface');
-                    currentQuestionIndex = 0;
-                    userAnswers = new Array(sampleQuestions.length).fill(undefined);
-                    console.log('Quiz started - userAnswers initialized:', userAnswers);
-                    displayQuestion(currentQuestionIndex);
-                    remainingTime = 60 * 60; // 60분으로 초기화
-                    startTimer(); // 타이머 시작
-                } else {
+                if (!selectedSubject) {
                     alert('응시할 과목을 선택해주세요.');
+                    return;
+                }
+                
+                // 과목 value와 JSON 파일명 매핑
+                const fileMap = {
+                    "web_access": "questions-access.json",
+                    "internet": "questions-internet.json",
+                    "html": "questions-html.json",
+                    "css_script": "questions-css-script.json",
+                    "info_access": "questions-info-access.json"
+                };
+                
+                const fileName = fileMap[selectedSubject.value];
+                if (!fileName) {
+                    alert('잘못된 과목 선택입니다.');
+                    return;
+                }
+
+                startQuizBtn.disabled = true;
+                startQuizBtn.textContent = '문제 불러오는 중...';
+                
+                const success = await loadQuizData(fileName);
+                
+                startQuizBtn.disabled = false;
+                startQuizBtn.textContent = '문제풀기';
+
+                if (success) {
+                    startQuiz(); 
                 }
             });
         }
 
+        // 모의고사 퀴즈 시작 버튼
         if (startMockExamBtn) {
-            startMockExamBtn.addEventListener('click', () => {
-                showSection('quiz-interface');
-                currentQuestionIndex = 0;
-                userAnswers = new Array(sampleQuestions.length).fill(undefined);
-                console.log('Mock exam started - userAnswers initialized:', userAnswers);
-                displayQuestion(currentQuestionIndex);
-                remainingTime = 60 * 60; // 60분으로 초기화
-                startTimer(); // 타이머 시작
+            startMockExamBtn.addEventListener('click', async () => {
+                const fileName = "questions-mock-exam.json";
+
+                startMockExamBtn.disabled = true;
+                startMockExamBtn.textContent = '모의고사 불러오는 중...';
+
+                const success = await loadQuizData(fileName);
+                
+                startMockExamBtn.disabled = false;
+                startMockExamBtn.textContent = '모의고사 시작';
+
+                if (success) {
+                    startQuiz();
+                }
             });
         }
     }
 
-    // --- 6. 결과 대시보드 (수정된 수식) ---
+    // --- 6. [!!] .textContent로 HTML 태그를 안전하게 처리하도록 수정한 showResults 함수 (기존과 동일)
     function showResults() {
         console.log('=== SHOW RESULTS FUNCTION CALLED ===');
         
@@ -885,105 +853,83 @@ document.addEventListener('DOMContentLoaded', () => {
         const summaryContainer = resultDashboard.querySelector('#result-summary');
         const wrongListContainer = resultDashboard.querySelector('#wrong-questions-list');
 
-        // 샘플 문제 데이터 (동일한 데이터 사용)
-        const sampleQuestions = [
-            {
-                question: "웹 접근성의 정의로 가장 적절한 것은?",
-                options: [
-                    "모든 사용자가 웹을 이용할 수 있도록 하는 것",
-                    "장애인만을 위한 웹 서비스",
-                    "고령자를 위한 웹 서비스",
-                    "시각 장애인만을 위한 웹 서비스"
-                ],
-                correct: 0,
-                explanation: "웹 접근성은 장애인, 고령자 등 모든 사용자가 웹 콘텐츠에 접근하고 이용할 수 있도록 하는 웹 사용성의 한 측면입니다."
-            },
-            {
-                question: "WCAG 2.2의 주요 원칙이 아닌 것은?",
-                options: [
-                    "인식의 용이성",
-                    "운용의 용이성",
-                    "이해의 용이성",
-                    "속도의 용이성"
-                ],
-                correct: 3,
-                explanation: "WCAG 2.2의 주요 원칙은 인식의 용이성, 운용의 용이성, 이해의 용이성, 견고성입니다. '속도의 용이성'은 포함되지 않습니다."
-            }
-        ];
+        if (allQuestions.length === 0) {
+            console.error("No questions loaded to show results.");
+            summaryContainer.innerHTML = '<h3>시험 결과</h3><p>채점할 문제가 없습니다. 퀴즈를 다시 시작해주세요.</p>';
+            return;
+        }
 
         // 전역 userAnswers 배열 확인
-        console.log('Global userAnswers array:', userAnswers);
-        console.log('userAnswers type:', typeof userAnswers);
-        console.log('userAnswers length:', userAnswers ? userAnswers.length : 'undefined');
-        
-        // userAnswers가 정의되지 않았거나 배열이 아닌 경우 빈 배열로 초기화
-        if (!userAnswers || !Array.isArray(userAnswers)) {
-            console.warn('userAnswers is not properly initialized, creating new array');
-            userAnswers = new Array(sampleQuestions.length).fill(undefined);
+        if (!userAnswers || userAnswers.length !== allQuestions.length) {
+            console.warn('userAnswers array mismatch, re-initializing');
+            userAnswers = new Array(allQuestions.length).fill(undefined);
         }
 
         let correctCount = 0;
-        const wrongAnswers = []; // 수정: 배열로 초기화
+        let totalMcqQuestions = 0;
+        const wrongMcqAnswers = [];
+        const shortAnswerReviews = [];
 
-        // 정답 체크
         console.log('=== SCORE CALCULATION START ===');
-        console.log('Sample questions count:', sampleQuestions.length);
         
-        for (let i = 0; i < sampleQuestions.length; i++) {
+        for (let i = 0; i < allQuestions.length; i++) {
+            const question = allQuestions[i];
             const userAnswer = userAnswers[i];
-            const correctAnswer = sampleQuestions[i].correct;
-            
-            console.log(`Question ${i + 1}:`);
-            console.log(`  - User answer: ${userAnswer} (${userAnswer !== undefined ? sampleQuestions[i].options[userAnswer] : 'undefined'})`);
-            console.log(`  - Correct answer: ${correctAnswer} (${sampleQuestions[i].options[correctAnswer]})`);
-            
-            if (userAnswer !== undefined && userAnswer === correctAnswer) {
-                correctCount++;
-                console.log(`  - Result: CORRECT! ✅`);
-            } else if (userAnswer !== undefined) {
-                wrongAnswers.push({
+
+            if (question.type === 'short') {
+                // 단답형 문제는 자동 채점에서 제외하고, 리뷰 목록에 추가
+                shortAnswerReviews.push({
                     questionNumber: i + 1,
-                    question: sampleQuestions[i].question,
-                    userAnswer: sampleQuestions[i].options[userAnswer],
-                    correctAnswer: sampleQuestions[i].options[correctAnswer],
-                    explanation: sampleQuestions[i].explanation
+                    question: question.question,
+                    userAnswer: userAnswer || "답안 없음",
+                    correctAnswer: question.correct, // 모범 답안
+                    explanation: question.explanation,
+                    subject: question.subject || "기타" // 모의고사 과목명
                 });
-                console.log(`  - Result: WRONG! ❌`);
-            } else {
-                wrongAnswers.push({
-                    questionNumber: i + 1,
-                    question: sampleQuestions[i].question,
-                    userAnswer: "답안 없음",
-                    correctAnswer: sampleQuestions[i].options[correctAnswer],
-                    explanation: sampleQuestions[i].explanation
-                });
-                console.log(`  - Result: NO ANSWER! ⚠️`);
+            } else { 
+                // MCQ 또는 기본값 (자동 채점)
+                totalMcqQuestions++;
+                const correctAnswer = question.correct;
+                
+                if (userAnswer !== undefined && userAnswer === correctAnswer) {
+                    correctCount++;
+                } else {
+                    wrongMcqAnswers.push({
+                        questionNumber: i + 1,
+                        question: question.question,
+                        userAnswer: (userAnswer !== undefined && question.options[userAnswer]) ? question.options[userAnswer] : "답안 없음",
+                        correctAnswer: question.options[correctAnswer],
+                        explanation: question.explanation,
+                        subject: question.subject || "기타" // 모의고사 과목명
+                    });
+                }
             }
         }
 
-        const totalQuestions = sampleQuestions.length;
-        const score = Math.round((correctCount / totalQuestions) * 100);
+        // 점수는 객관식 문제 기준으로만 계산
+        const score = totalMcqQuestions > 0 ? Math.round((correctCount / totalMcqQuestions) * 100) : 0;
+        const totalQuestions = allQuestions.length;
 
-        console.log(`=== FINAL SCORE ===`);
-        console.log(`Correct: ${correctCount}/${totalQuestions}`);
+        console.log(`=== FINAL SCORE (MCQ Only) ===`);
+        console.log(`Correct: ${correctCount}/${totalMcqQuestions}`);
         console.log(`Score: ${score}%`);
-        console.log(`Wrong answers: ${wrongAnswers.length}`);
+        console.log(`Wrong MCQs: ${wrongMcqAnswers.length}`);
+        console.log(`Short Answers to review: ${shortAnswerReviews.length}`);
         console.log('=== SCORE CALCULATION END ===');
 
-        // 타이머 정지
         stopTimer();
 
-        // 결과 표시 (개선된 UI)
+        // 결과 요약 표시
         summaryContainer.innerHTML = `
             <h3>시험 결과</h3>
             <div class="score-display">
                 <div class="score-item">
                     <div class="score-number">${score}%</div>
-                    <div class="score-label">정답률</div>
+                    <div class="score-label">정답률 (객관식)</div>
                 </div>
                 <div class="score-item">
-                    <div class="score-number">${correctCount}</div>
-                    <div class="score-label">정답 수</div>
+                    <div class="score-number">${correctCount} / ${totalMcqQuestions}</div>
+                    <div class="score-label">정답 수 (객관식)</div>
                 </div>
                 <div class="score-item">
                     <div class="score-number">${totalQuestions}</div>
@@ -992,34 +938,127 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `;
         
-        // 틀린 문제 표시
         wrongListContainer.innerHTML = ''; // 초기화
         
-        if (wrongAnswers.length === 0) {
-            wrongListContainer.innerHTML = '<p>모든 문제를 맞췄습니다! 축하합니다! 🎉</p>';
-        } else {
+        // 1. 틀린 객관식 문제 표시
+        if (wrongMcqAnswers.length === 0 && totalMcqQuestions > 0) {
+            wrongListContainer.innerHTML = '<p>모든 객관식 문제를 맞췄습니다! 축하합니다! 🎉</p>';
+        } else if (totalMcqQuestions > 0) {
             const wrongTitle = document.createElement('h3');
-            wrongTitle.textContent = `틀린 문제 상세보기 (${wrongAnswers.length}개)`;
+            wrongTitle.textContent = `틀린 객관식 문제 (${wrongMcqAnswers.length}개)`;
             wrongListContainer.appendChild(wrongTitle);
             
-            wrongAnswers.forEach((item) => {
+            wrongMcqAnswers.forEach((item) => {
                 const details = document.createElement('details');
-                details.innerHTML = `
-                    <summary>문제 ${item.questionNumber}: ${item.question}</summary>
-                    <div class="wrong-answer-details">
-                        <p><strong>나의 답:</strong> <span class="user-answer">${item.userAnswer}</span></p>
-                        <p><strong>정답:</strong> <span class="correct-answer">${item.correctAnswer}</span></p>
-                        <p><strong>해설:</strong> ${item.explanation}</p>
-                    </div>
-                `;
+                
+                // [!!] .textContent 수정을 위한 summary 생성
+                const summary = document.createElement('summary');
+                if (allQuestions[0].subject) { // 모의고사 과목 태그
+                    const subjectTag = document.createElement('span');
+                    subjectTag.className = 'subject-tag';
+                    subjectTag.textContent = item.subject;
+                    summary.appendChild(subjectTag);
+                }
+                // [!!] .textContent로 안전하게 질문 삽입
+                summary.appendChild(document.createTextNode(`문제 ${item.questionNumber}: ${item.question}`));
+                details.appendChild(summary);
+
+                // --- 상세 내용 생성 ---
+                const detailsContent = document.createElement('div');
+                detailsContent.className = 'wrong-answer-details';
+                
+                // 1. 나의 답
+                const p1 = document.createElement('p');
+                p1.innerHTML = '<strong>나의 답:</strong> ';
+                const span1 = document.createElement('span');
+                span1.className = 'user-answer';
+                span1.textContent = item.userAnswer; // .textContent 사용
+                p1.appendChild(span1);
+                detailsContent.appendChild(p1);
+
+                // 2. 정답
+                const p2 = document.createElement('p');
+                p2.innerHTML = '<strong>정답:</strong> ';
+                const span2 = document.createElement('span');
+                span2.className = 'correct-answer';
+                span2.textContent = item.correctAnswer; // .textContent 사용
+                p2.appendChild(span2);
+                detailsContent.appendChild(p2);
+
+                // 3. 해설
+                const p3 = document.createElement('p');
+                p3.innerHTML = '<strong>해설:</strong> ';
+                // [!!] .textContent로 안전하게 해설 삽입
+                p3.appendChild(document.createTextNode(item.explanation));
+                detailsContent.appendChild(p3);
+                
+                details.appendChild(detailsContent);
                 wrongListContainer.appendChild(details);
             });
+        }
+        
+        // 2. 단답형 문제 리뷰 표시
+        if (shortAnswerReviews.length > 0) {
+            const shortReviewContainer = document.createElement('div');
+            shortReviewContainer.id = 'short-answer-review-list';
+            shortReviewContainer.innerHTML = `<h3>단답형 문제 다시보기 (${shortAnswerReviews.length}개)</h3><p>단답형 문제는 직접 모범 답안과 비교해보세요.</p>`;
+            
+            shortAnswerReviews.forEach((item) => {
+                const details = document.createElement('details');
+                
+                // [!!] .textContent 수정을 위한 summary 생성
+                const summary = document.createElement('summary');
+                if (allQuestions[0].subject) { // 모의고사 과목 태그
+                    const subjectTag = document.createElement('span');
+                    subjectTag.className = 'subject-tag';
+                    subjectTag.textContent = item.subject;
+                    summary.appendChild(subjectTag);
+                }
+                summary.appendChild(document.createTextNode(`문제 ${item.questionNumber}: (단답형)`));
+                details.appendChild(summary);
+
+                // --- 상세 내용 생성 (textContent로 안전하게) ---
+                const detailsContent = document.createElement('div');
+                detailsContent.className = 'wrong-answer-details short-answer-review';
+                
+                detailsContent.innerHTML = `
+                    <p><strong>문제:</strong></p>
+                    <p><strong>나의 답:</strong></p>
+                    <p><strong>모범 답안:</strong></p>
+                    <p><strong>해설:</strong></p>
+                    `;
+                
+                const questionTextEl = document.createElement('pre');
+                questionTextEl.className = 'question-text';
+                questionTextEl.textContent = item.question; // .textContent
+                
+                const userAnswerEl = document.createElement('pre');
+                userAnswerEl.className = 'user-answer';
+                userAnswerEl.textContent = item.userAnswer || ' '; // .textContent
+
+                const correctAnswerEl = document.createElement('pre');
+                correctAnswerEl.className = 'correct-answer';
+                correctAnswerEl.textContent = item.correctAnswer; // .textContent
+                
+                const explanationEl = document.createElement('p');
+                explanationEl.textContent = item.explanation; // .textContent
+
+                // 안전하게 생성된 요소들을 제자리에 삽입
+                detailsContent.querySelector('p:nth-of-type(1)').insertAdjacentElement('afterend', questionTextEl);
+                detailsContent.querySelector('p:nth-of-type(2)').insertAdjacentElement('afterend', userAnswerEl);
+                detailsContent.querySelector('p:nth-of-type(3)').insertAdjacentElement('afterend', correctAnswerEl);
+                detailsContent.querySelector('p:nth-of-type(4)').insertAdjacentElement('afterend', explanationEl);
+                
+                details.appendChild(detailsContent);
+                shortReviewContainer.appendChild(details);
+            });
+            wrongListContainer.appendChild(shortReviewContainer);
         }
 
         showSection('result-dashboard');
     }
 
-    // --- 7. 제출 확인 모달 로직 ---
+    // --- 7. 제출 확인 모달 로직 --- (기존과 동일)
     const modalContainer = document.getElementById('modal-container');
     const modalConfirmBtn = document.getElementById('modal-confirm-btn');
     const modalCancelBtn = document.getElementById('modal-cancel-btn');
@@ -1070,7 +1109,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- 8. 문의하기 폼 검증 ---
+    // --- 8. [!!] 보존된 문의하기 폼 검증 --- (기존과 동일)
     const contactForm = document.getElementById('contact-form');
     if (contactForm) {
         // 실시간 유효성 검사 함수들
@@ -1212,7 +1251,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- 9. 브라우저 히스토리 관리 ---
+    // --- 9. 브라우저 히스토리 관리 --- (기존과 동일)
     window.addEventListener('popstate', (e) => {
         if (e.state && e.state.id) {
             showSection(e.state.id);
@@ -1222,10 +1261,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- 10. 접근성 향상을 위한 키보드 네비게이션 ---
+    // --- 10. 접근성 향상을 위한 키보드 네비게이션 --- (기존과 동일)
     document.addEventListener('keydown', (e) => {
         // Tab 트랩핑 (모달이 열렸을 때)
-        if (!modalContainer.classList.contains('hidden')) {
+        if (modalContainer && !modalContainer.classList.contains('hidden')) {
             const focusableElements = modalContainer.querySelectorAll(
                 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
             );
@@ -1248,5 +1287,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    console.log('=== APPLICATION INITIALIZED SUCCESSFULLY ===');
+    console.log('=== APPLICATION INITIALIZED SUCCESSFULLY (Full Version, v6-Search) ===');
 });
