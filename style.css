@@ -210,7 +210,19 @@ section#main-page {
     box-shadow: none;
 }
 
-/* ... (이하 기존 스타일) ... */
+/* [!!] 스터디 페이지 h2 제목 하단 여백 추가 */
+#study-page h2 {
+    margin-bottom: var(--spacing-6);
+}
+
+/* [!!] 퀴즈 페이지 h2 제목 하단 여백 추가 */
+#quiz-page h2 {
+    margin-bottom: var(--spacing-6);
+}
+/* [!!] 시험 결과 페이지 h2 제목 하단 여백 추가 */
+#result-dashboard h2 {
+    margin-bottom: var(--spacing-6);
+}
 
 /* ===== 컴포넌트 시스템 ===== */
 /* 버튼 시스템 */
@@ -371,7 +383,6 @@ section#main-page {
 }
 
 /* ===== 캐러셀 컴포넌트 ===== */
-/* ===== 캐러셀 컴포넌트 ===== */
 #main-carousel {
     position: relative;
     margin: var(--spacing-8) 0;
@@ -452,6 +463,16 @@ section#main-page {
     height: 300px; /* 배너 높이에 고정 */
     object-fit: cover; 
     display: block;
+}
+
+/* [!!] 이미지 링크를 위한 스타일 추가 */
+.carousel-slide a.carousel-link {
+    display: block;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
+    line-height: 0; /* 링크 여백 제거 */
 }
 
 .carousel-controls {
@@ -541,13 +562,14 @@ section#main-page {
     outline: 2px solid rgba(255, 255, 255, 0.8);
     outline-offset: 2px;
 }
+
 /* ===== 탭 인터페이스 ===== */
 .study-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     gap: var(--spacing-8);
-    margin-bottom: var(--spacing-8);
+    margin-bottom: var(--spacing-4); /* [!!] 간격 수정 (sp-8 -> sp-4) */
     flex-wrap: wrap;
 }
 
@@ -593,15 +615,13 @@ section#main-page {
 }
 
 [role="tabpanel"] {
-    padding: var(--spacing-8);
+    padding: var(--spacing-6); /* [!!] 간격 수정 (sp-8 -> sp-6) */
     border: 1px solid var(--gray-200);
     border-top: none;
     border-radius: 0 0 var(--radius-lg) var(--radius-lg);
     background-color: white;
     min-height: 400px;
 }
-
-/* [!!] 기존 tabpanel h3, h4 등 스타일 제거 (아코디언 스타일이 대체) */
 
 /* ===== 검색 컴포넌트 ===== */
 .study-search {
@@ -1277,7 +1297,7 @@ section#main-page {
     color: var(--success-700);
     font-size: var(--font-size-2xl);
     font-weight: 700;
-    margin-bottom: var(--spacing-4);
+    margin-bottom: var(--spacing-6); /* [!!] 간격 수정 (sp-4 -> sp-6) */
 }
 
 .score-display {
@@ -1644,11 +1664,6 @@ pre.question-text {
     border: 1px solid var(--gray-200);
 }
 
-/* 실기 시험 테이블의 5번째 열(시험시간) 중앙 정렬 */
-.exam-table tbody tr:only-child td:nth-child(5) {
-    text-align: center;
-}
-
 .exam-table th,
 .exam-table td {
     border: 1px solid var(--gray-200);
@@ -1671,7 +1686,7 @@ pre.question-text {
 }
 
 .exam-table td:first-child,
-.exam-table td:nth-child(2),
+.exam-table td:nth-child(2), /* [!!] 2번째 칸 중앙 정렬 추가 */
 .exam-table td:nth-child(3) {
     text-align: center;
 }
@@ -1687,6 +1702,12 @@ pre.question-text {
     font-weight: 700;
     font-size: var(--font-size-base);
 }
+
+/* [!!] 실기 시험 테이블의 5번째 열(시험시간) 중앙 정렬 추가 */
+.exam-table tbody tr:only-child td:nth-child(5) {
+    text-align: center;
+}
+
 
 .call-to-action {
     margin-top: var(--spacing-8);
@@ -1709,7 +1730,7 @@ pre.question-text {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-2);
-    margin-top: var(--spacing-6);
+    margin-top: 0; /* [!!] 간격 수정 (sp-6 -> 0) */
 }
 
 .accordion-item {
@@ -1884,6 +1905,10 @@ pre.question-text {
         padding: var(--spacing-2) var(--spacing-3);
         font-size: var(--font-size-xs);
     }
+
+    [role="tabpanel"] {
+        padding: var(--spacing-4); /* [!!] 간격 수정 */
+    }
     
     #quiz-mode-selection {
         grid-template-columns: 1fr;
@@ -2031,11 +2056,11 @@ pre.question-text {
     .exam-table td:nth-child(3):before { content: "문항수"; }
     .exam-table td[rowspan="5"]:nth-child(4):before { content: "시험시간/응시료"; }
     /* 실기 테이블용 레이블 */
-    .exam-table tbody:nth-child(2) tr:nth-child(1) td:nth-child(1):before { content: "구분"; }
-    .exam-table tbody:nth-child(2) tr:nth-child(1) td:nth-child(2):before { content: "시험과목"; }
-    .exam-table tbody:nth-child(2) tr:nth-child(1) td:nth-child(3):before { content: "출제기준"; }
-    .exam-table tbody:nth-child(2) tr:nth-child(1) td:nth-child(4):before { content: "시험유형"; }
-    .exam-table tbody:nth-child(2) tr:nth-child(1) td:nth-child(5):before { content: "시험시간/응시료"; }
+    .exam-table tbody tr:only-child td:nth-child(1):before { content: "구분"; }
+    .exam-table tbody tr:only-child td:nth-child(2):before { content: "시험과목"; }
+    .exam-table tbody tr:only-child td:nth-child(3):before { content: "출제기준"; }
+    .exam-table tbody tr:only-child td:nth-child(4):before { content: "시험유형"; }
+    .exam-table tbody tr:only-child td:nth-child(5):before { content: "시험시간/응시료"; }
     
     .exam-table td[rowspan] {
         border-bottom: 1px solid var(--gray-200);
@@ -2046,6 +2071,15 @@ pre.question-text {
     .exam-table td, .exam-table td[rowspan] {
         text-align: right;
         padding-left: 50%;
+    }
+    
+    /* [!!] 반응형 아코디언 스타일 */
+    .accordion-header {
+        padding: var(--spacing-3) var(--spacing-4);
+        font-size: var(--font-size-base);
+    }
+    .accordion-content {
+        padding: var(--spacing-4);
     }
 }
 
