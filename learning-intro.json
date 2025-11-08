@@ -1,0 +1,41 @@
+{
+  "introTitle": "시험 개요",
+  "introText": "웹 접근성 전문가 자격증(Web Accessibility Specialist) 2급 필기 및 실기 시험 정보입니다.",
+  
+  "writtenExam": {
+    "title": "2급 필기 시험과목 및 시간",
+    "headers": ["구분", "시험과목", "문항수", "시험시간 및 응시료"],
+    "rows": [
+      { "subject": "웹접근성 표준 개론", "count": "20문항" },
+      { "subject": "인터넷 개론", "count": "20문항" },
+      { "subject": "HTML 개론", "count": "20문항" },
+      { "subject": "CSS/스크립트 개론", "count": "20문항" },
+      { "subject": "정보접근성 개론", "count": "20문항" }
+    ],
+    "commonInfo": {
+      "label": "2급 필기",
+      "time": "09:00 입실<br>09:30~12:00 (150분)",
+      "fee": "응시료 50,000원"
+    }
+  },
+
+  "practicalExam": {
+    "title": "2급 실기 시험과목 및 시간",
+    "headers": ["구분", "시험과목", "출제기준", "시험유형", "시험시간 및 응시료"],
+    "rows": [
+      {
+        "label": "2급 실기",
+        "subject": "웹 접근성 실기 중급",
+        "criteria": "국내외 웹 접근성 표준 점검 및 구현",
+        "type": "주관식 필답형 (서술형)",
+        "commonInfo": "14:00 입실<br>14:30~17:00 (150분)<br><strong>응시료 60,000원</strong>"
+      }
+    ]
+  },
+
+  "cta": {
+    "text": "더 상세한 시험 정보는 UA LAB 공식 자격증 소개 페이지에서 확인하실 수 있습니다.",
+    "buttonText": "UA LAB 자격증 소개 페이지 가기",
+    "url": "http://www.ualab.or.kr/license.html"
+  }
+}
