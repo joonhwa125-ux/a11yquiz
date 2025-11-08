@@ -1513,6 +1513,122 @@ footer p {
     opacity: 0.9;
 }
 
+/* ===== [추가] 단답형 문제 스타일 ===== */
+.short-answer-textarea {
+    width: 100%;
+    padding: var(--spacing-4);
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-base);
+    font-family: 'Courier New', monospace; /* 코드/텍스트 입력에 적합 */
+    line-height: 1.6;
+    background: var(--gray-50);
+    min-height: 150px;
+}
+
+.short-answer-textarea:focus {
+    outline: none;
+    border-color: var(--primary-500);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* <p> 태그용 .question-text 스타일 재정의 (줄바꿈 없음) */
+p.question-text {
+    font-size: var(--font-size-lg);
+    line-height: 1.7;
+    margin-bottom: var(--spacing-8);
+    color: var(--gray-800);
+    font-weight: 500;
+}
+
+/* <pre> 태그용 .question-text 스타일 (줄바꿈 및 코드 형식 유지) */
+pre.question-text {
+    font-size: var(--font-size-base);
+    line-height: 1.6;
+    margin-bottom: var(--spacing-6);
+    color: var(--gray-800);
+    font-weight: 500;
+    white-space: pre-wrap; /* 자동 줄바꿈 */
+    font-family: 'Courier New', monospace;
+    background: var(--gray-100);
+    padding: var(--spacing-4);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--gray-200);
+}
+
+
+/* ===== [추가] 단답형 결과 리뷰 스타일 ===== */
+#short-answer-review-list h3 {
+    color: var(--primary-600);
+    margin-top: var(--spacing-8);
+    margin-bottom: var(--spacing-4);
+    border-top: 1px solid var(--gray-200);
+    padding-top: var(--spacing-6);
+}
+
+#short-answer-review-list > p {
+    margin-bottom: var(--spacing-4);
+    font-size: var(--font-size-sm);
+    color: var(--gray-600);
+}
+
+#short-answer-review-list details {
+    background: var(--primary-50);
+    border: 2px solid var(--primary-200);
+}
+
+#short-answer-review-list summary {
+    background: var(--primary-100);
+    color: var(--primary-700);
+    border-bottom: 1px solid var(--primary-200);
+}
+
+#short-answer-review-list summary:hover {
+    background: var(--primary-200);
+}
+
+.short-answer-review p {
+    font-weight: 600;
+    margin-top: var(--spacing-4);
+    margin-bottom: var(--spacing-2);
+}
+
+.short-answer-review pre.user-answer,
+.short-answer-review pre.correct-answer {
+    white-space: pre-wrap;
+    display: block;
+    width: 100%;
+    padding: var(--spacing-3);
+    font-family: 'Courier New', monospace;
+    font-size: var(--font-size-sm);
+}
+
+.short-answer-review pre.user-answer {
+    background: var(--warning-50);
+    border: 1px solid var(--warning-200);
+    color: var(--warning-800);
+}
+
+.short-answer-review pre.correct-answer {
+     background: var(--success-50);
+     border: 1px solid var(--success-200);
+     color: var(--success-800);
+}
+
+/* 결과 페이지의 과목 태그 */
+#wrong-questions-list .subject-tag {
+    display: inline-block;
+    background: var(--gray-200);
+    color: var(--gray-700);
+    padding: var(--spacing-1) var(--spacing-3);
+    border-radius: var(--radius-xl);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    margin-right: var(--spacing-3);
+    vertical-align: middle;
+}
+
+
 /* 반응형 디자인 */
 @media (max-width: 768px) {
     :root {
@@ -1829,4 +1945,113 @@ footer p {
     #quiz-timer.critical {
         animation: none;
     }
+}
+
+/* ... (기존 style.css 내용) ... */
+
+
+/* ===== [추가] 아코디언 UI 스타일 ===== */
+.accordion-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+    margin-top: var(--spacing-6);
+}
+
+.accordion-item {
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: white;
+}
+
+.accordion-header {
+    width: 100%;
+    padding: var(--spacing-4) var(--spacing-6);
+    background: white;
+    border: none;
+    border-bottom: 1px solid var(--gray-200);
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--gray-800);
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    font-family: inherit;
+}
+
+.accordion-item:last-child .accordion-header {
+    border-bottom: none;
+}
+
+.accordion-header:hover,
+.accordion-header:focus {
+    background-color: var(--primary-50);
+    color: var(--primary-600);
+}
+
+.accordion-header::before {
+    content: '▼';
+    font-size: var(--font-size-sm);
+    transition: transform 0.2s ease;
+    transform-origin: center;
+}
+
+.accordion-header[aria-expanded="true"] {
+    background-color: var(--primary-50);
+    color: var(--primary-600);
+    border-bottom-color: var(--gray-200);
+}
+
+.accordion-header[aria-expanded="true"]::before {
+    transform: rotate(-180deg);
+}
+
+.accordion-content {
+    padding: var(--spacing-6);
+    background: var(--gray-50);
+    border-top: 1px solid var(--gray-200);
+}
+
+.accordion-content h4 {
+    color: var(--primary-600);
+    font-size: var(--font-size-base);
+    margin-top: var(--spacing-4);
+    margin-bottom: var(--spacing-3);
+    border-bottom: 1px solid var(--primary-100);
+    padding-bottom: var(--spacing-2);
+}
+
+.accordion-content p,
+.accordion-content ul {
+    font-size: var(--font-size-sm);
+    line-height: 1.7;
+    margin-bottom: var(--spacing-4);
+}
+
+.accordion-content ul {
+    margin-left: var(--spacing-5);
+}
+
+.accordion-content li {
+    margin-bottom: var(--spacing-2);
+}
+
+.accordion-content pre {
+    white-space: pre-wrap;
+    font-family: 'Courier New', monospace;
+    background: var(--gray-100);
+    padding: var(--spacing-4);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--gray-200);
+    font-size: var(--font-size-sm);
+}
+
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+/* ... (기존 미디어 쿼리 내용) ... */
 }
